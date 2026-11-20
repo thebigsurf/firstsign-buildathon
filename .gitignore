@@ -11,3 +11,7 @@ frontend/dist/
 frontend/node_modules/
 *.log
 .pytest_cache/
+
+# backend runtime
+backend/.cache/
+backend/.state/

@@ -1,0 +1,9 @@
+# Builds the image from infra/Dockerfile (repo root as context) and pushes it to Artifact Registry.
+# Run from the repo root:  gcloud builds submit --config infra/cloudbuild.yaml --substitutions _IMAGE=<image> .
+substitutions:
+  _IMAGE: asia-south1-docker.pkg.dev/firstsign-buildathon/firstsign/firstsign:latest
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "infra/Dockerfile", "-t", "${_IMAGE}", "."]
+images:
+  - "${_IMAGE}"

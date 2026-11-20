@@ -1,0 +1,25 @@
+chemist_id,shop_name,owner_first_name,pin,lat,lng,language,software
+C00,Shop 00,Owner00,400001,19.0,72.8,hi,paper
+C01,Shop 01,Owner01,400001,19.001,72.8,mr,paper
+C02,Shop 02,Owner02,400001,19.002,72.8,en,paper
+C03,Shop 03,Owner03,400001,19.003,72.8,hi,paper
+C04,Shop 04,Owner04,400001,19.004,72.8,mr,paper
+C05,Shop 05,Owner05,400001,19.005,72.8,en,paper
+C10,Shop 10,Owner10,400002,19.009,72.8,hi,paper
+C11,Shop 11,Owner11,400002,19.01,72.8,mr,paper
+C12,Shop 12,Owner12,400002,19.011,72.8,en,paper
+C13,Shop 13,Owner13,400002,19.012,72.8,hi,paper
+C14,Shop 14,Owner14,400002,19.013,72.8,mr,paper
+C15,Shop 15,Owner15,400002,19.014,72.8,en,paper
+C20,Shop 20,Owner20,400003,19.15,72.95,hi,paper
+C21,Shop 21,Owner21,400003,19.151,72.95,mr,paper
+C22,Shop 22,Owner22,400003,19.151999999999997,72.95,en,paper
+C23,Shop 23,Owner23,400003,19.153,72.95,hi,paper
+C24,Shop 24,Owner24,400003,19.154,72.95,mr,paper
+C25,Shop 25,Owner25,400003,19.154999999999998,72.95,en,paper
+C30,Shop 30,Owner30,400004,19.3,72.7,hi,paper
+C31,Shop 31,Owner31,400004,19.301000000000002,72.7,mr,paper
+C32,Shop 32,Owner32,400004,19.302,72.7,en,paper
+C33,Shop 33,Owner33,400004,19.303,72.7,hi,paper
+C34,Shop 34,Owner34,400004,19.304000000000002,72.7,mr,paper
+C35,Shop 35,Owner35,400004,19.305,72.7,en,paper

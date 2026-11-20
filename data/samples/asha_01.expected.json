@@ -1,0 +1,16 @@
+{
+  "asha_id": "ASHA03",
+  "locality_id": "400024-02",
+  "language": "hi",
+  "transcript": "आज भीम नगर में चौदह घर गई। पाँच घरों में दस्त और उल्टी, तीन बच्चे हैं, एक को अस्पताल भेजा। लोग कह रहे हैं पानी गंदा आ रहा है।",
+  "households_visited": 14,
+  "fever": 0,
+  "diarrhoea": 5,
+  "cough": 0,
+  "breathing": 0,
+  "rash": 0,
+  "children_affected": 3,
+  "referred": 1,
+  "water_issue_reported": true,
+  "notes": "Vomiting along with diarrhoea. Residents say the supplied water looks dirty."
+}

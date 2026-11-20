@@ -1,0 +1,15 @@
+# Pinned to the versions installed and tested on Python 3.11.9 (Windows 11).
+fastapi==0.136.1
+uvicorn==0.46.0
+pydantic==2.13.3
+google-genai==3.6.1
+python-multipart==0.0.27
+python-dotenv==1.2.2
+rapidfuzz==3.14.6
+pandas==3.0.2
+numpy==2.4.4
+httpx==0.28.1
+
+# Optional, imported lazily (STORAGE=firestore / bq.py). Not needed to run.
+# google-cloud-firestore
+# google-cloud-bigquery

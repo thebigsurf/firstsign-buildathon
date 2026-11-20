@@ -1,0 +1,16 @@
+{
+  "asha_id": "ASHA09",
+  "locality_id": "400088-02",
+  "language": "hi",
+  "transcript": "आज लल्लूभाई कंपाउंड में सोलह घर गई। छह घरों में बुखार है, दो बच्चों को तेज़ बुखार और बदन दर्द है, एक को अस्पताल भेजा। खाँसी नहीं है। आसपास पानी जमा है और मच्छर बहुत हैं।",
+  "households_visited": 16,
+  "fever": 6,
+  "diarrhoea": 0,
+  "cough": 0,
+  "breathing": 0,
+  "rash": 0,
+  "children_affected": 2,
+  "referred": 1,
+  "water_issue_reported": false,
+  "notes": "High fever with body ache, no cough. Stagnant water nearby and many mosquitoes."
+}

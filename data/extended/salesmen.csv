@@ -1,0 +1,17 @@
+salesman_id,first_name,role,beat_pins,beat_days
+SM01,Imran,salesman,400070|400024,Mon|Thu
+SM02,Santosh,salesman,400022|400037,Tue|Fri
+SM03,Rajesh,salesman,400017|400019,Wed|Sat
+SM04,Faisal,salesman,400031|400071,Mon|Thu
+SM05,Dinesh,salesman,400088|400043,Tue|Fri
+SM06,Prakash,salesman,400086|400077,Wed|Sat
+SM07,Ashok,salesman,400072|400093,Mon|Thu
+SM08,Vikas,salesman,400050|400051,Tue|Fri
+SM09,Sachin,salesman,400055|400069,Wed|Sat
+SM10,Rafiq,salesman,400058|400076,Tue|Sat
+CK01,Aman,order_clerk,,
+CK02,Meena,order_clerk,,
+CK03,Pooja,order_clerk,,
+CK04,Ketan,order_clerk,,
+CK05,Sunil,order_clerk,,
+CK06,Rohan,order_clerk,,

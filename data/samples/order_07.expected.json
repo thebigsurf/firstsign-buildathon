@@ -1,0 +1,117 @@
+{
+  "message_id": "msg_07",
+  "chemist_id": "CH064",
+  "language": "en",
+  "transcript": "Dolo 650   50\nCrocin 650   30\nPCM 500   40\nMeftal P syp   12\nORSL orange   10\nLimcee   10\n[struck out] Avil 25   5",
+  "lines": [
+    {
+      "raw_text": "Dolo 650",
+      "sku_id": "SKU0001",
+      "brand": "Dolo 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 50,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Crocin 650",
+      "sku_id": "SKU0006",
+      "brand": "Crocin 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 30,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "PCM 500",
+      "sku_id": "SKU0015",
+      "brand": "Paracetamol IP (generic)",
+      "strength": "500 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 40,
+      "unit": "strip",
+      "confidence": 0.55,
+      "status": "uncertain",
+      "alternatives": [
+        {
+          "sku_id": "SKU0015",
+          "brand": "Paracetamol IP (generic)",
+          "score": 0.6
+        },
+        {
+          "sku_id": "SKU0005",
+          "brand": "Crocin Advance",
+          "score": 0.18
+        },
+        {
+          "sku_id": "SKU0002",
+          "brand": "Dolo 500",
+          "score": 0.12
+        },
+        {
+          "sku_id": "SKU0013",
+          "brand": "Pacimol 500",
+          "score": 0.1
+        }
+      ]
+    },
+    {
+      "raw_text": "Meftal P syp",
+      "sku_id": "SKU0019",
+      "brand": "Meftal-P Suspension",
+      "strength": "50 mg + 125 mg/5 ml",
+      "form": "syrup",
+      "molecule": "Mefenamic Acid + Paracetamol",
+      "group": "fever",
+      "qty": 12,
+      "unit": "bottle",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "ORSL orange",
+      "sku_id": "SKU0081",
+      "brand": "ORSL Orange",
+      "strength": "200 ml",
+      "form": "syrup",
+      "molecule": "Oral Rehydration Salts",
+      "group": "heat",
+      "qty": 10,
+      "unit": "bottle",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Limcee",
+      "sku_id": "SKU0154",
+      "brand": "Limcee 500",
+      "strength": "500 mg",
+      "form": "tablet",
+      "molecule": "Vitamin C",
+      "group": "other",
+      "qty": 10,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    }
+  ],
+  "not_available": [],
+  "notes": "The last line (Avil 25) is crossed out by the sender, so it is not an order line. Fever-medicine heavy order.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}

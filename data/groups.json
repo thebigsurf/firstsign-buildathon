@@ -1,0 +1,79 @@
+[
+  {
+    "id": "fever",
+    "label": "Fever",
+    "label_hi": "बुखार",
+    "color_hint": "#e11d48",
+    "is_chronic": false
+  },
+  {
+    "id": "diarrhoea",
+    "label": "Diarrhoea and vomiting",
+    "label_hi": "दस्त और उल्टी",
+    "color_hint": "#0284c7",
+    "is_chronic": false
+  },
+  {
+    "id": "respiratory",
+    "label": "Cough, cold and breathing",
+    "label_hi": "खाँसी, सर्दी और साँस",
+    "color_hint": "#7c3aed",
+    "is_chronic": false
+  },
+  {
+    "id": "allergy",
+    "label": "Allergy",
+    "label_hi": "एलर्जी",
+    "color_hint": "#d97706",
+    "is_chronic": false
+  },
+  {
+    "id": "heat",
+    "label": "Heat and dehydration",
+    "label_hi": "गर्मी और पानी की कमी",
+    "color_hint": "#ea580c",
+    "is_chronic": false
+  },
+  {
+    "id": "fungal",
+    "label": "Skin fungal infection",
+    "label_hi": "त्वचा का फंगल संक्रमण",
+    "color_hint": "#65a30d",
+    "is_chronic": false
+  },
+  {
+    "id": "eye",
+    "label": "Eye infection",
+    "label_hi": "आँख का संक्रमण",
+    "color_hint": "#0d9488",
+    "is_chronic": false
+  },
+  {
+    "id": "tb_watch",
+    "label": "TB watch",
+    "label_hi": "टीबी निगरानी",
+    "color_hint": "#9f1239",
+    "is_chronic": false
+  },
+  {
+    "id": "chronic_bp",
+    "label": "Blood pressure and heart (chronic)",
+    "label_hi": "बीपी और दिल (दीर्घकालिक)",
+    "color_hint": "#475569",
+    "is_chronic": true
+  },
+  {
+    "id": "chronic_diabetes",
+    "label": "Diabetes (chronic)",
+    "label_hi": "मधुमेह (दीर्घकालिक)",
+    "color_hint": "#64748b",
+    "is_chronic": true
+  },
+  {
+    "id": "other",
+    "label": "Other",
+    "label_hi": "अन्य",
+    "color_hint": "#94a3b8",
+    "is_chronic": false
+  }
+]

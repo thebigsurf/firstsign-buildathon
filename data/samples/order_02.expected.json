@@ -1,0 +1,128 @@
+{
+  "message_id": "msg_02",
+  "chemist_id": "CH020",
+  "language": "hi",
+  "transcript": "सुनो, आज का माल लिखो। पैन डी दस पत्ते, ओ आर एस पचास, रेडोटिल सौ वाला पंद्रह पत्ते, ज़िंकोविट पाँच पत्ते, शेल्कल पाँच पत्ते। और वो बच्चों वाली सिरप दो बोतल भेज देना।",
+  "lines": [
+    {
+      "raw_text": "pan dee",
+      "sku_id": "SKU0135",
+      "brand": "Pan-D",
+      "strength": "40 mg + 30 mg",
+      "form": "tablet",
+      "molecule": "Pantoprazole + Domperidone",
+      "group": "other",
+      "qty": 10,
+      "unit": "strip",
+      "confidence": 0.55,
+      "status": "uncertain",
+      "alternatives": [
+        {
+          "sku_id": "SKU0135",
+          "brand": "Pan-D",
+          "score": 0.55
+        },
+        {
+          "sku_id": "SKU0136",
+          "brand": "Pantop-D",
+          "score": 0.3
+        },
+        {
+          "sku_id": "SKU0137",
+          "brand": "Pan 40",
+          "score": 0.1
+        }
+      ]
+    },
+    {
+      "raw_text": "o r s",
+      "sku_id": "SKU0021",
+      "brand": "ORS Sachet (WHO formula)",
+      "strength": "21.8 g",
+      "form": "sachet",
+      "molecule": "Oral Rehydration Salts",
+      "group": "diarrhoea",
+      "qty": 50,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "redotil 100",
+      "sku_id": "SKU0030",
+      "brand": "Redotil 100",
+      "strength": "100 mg",
+      "form": "tablet",
+      "molecule": "Racecadotril",
+      "group": "diarrhoea",
+      "qty": 15,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "zincovit",
+      "sku_id": "SKU0153",
+      "brand": "Zincovit",
+      "strength": "Multivitamin + Zinc",
+      "form": "tablet",
+      "molecule": "Multivitamin + Minerals",
+      "group": "other",
+      "qty": 5,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "shelcal",
+      "sku_id": "SKU0150",
+      "brand": "Shelcal 500",
+      "strength": "500 mg",
+      "form": "tablet",
+      "molecule": "Calcium + Vitamin D3",
+      "group": "other",
+      "qty": 5,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "woh bachchon wali syrup",
+      "sku_id": null,
+      "brand": null,
+      "strength": null,
+      "form": null,
+      "molecule": null,
+      "group": null,
+      "qty": 2,
+      "unit": "bottle",
+      "confidence": 0.2,
+      "status": "unknown",
+      "alternatives": [
+        {
+          "sku_id": "SKU0010",
+          "brand": "Calpol 120 Suspension",
+          "score": 0.25
+        },
+        {
+          "sku_id": "SKU0003",
+          "brand": "Dolo 120 Suspension",
+          "score": 0.22
+        },
+        {
+          "sku_id": "SKU0007",
+          "brand": "Crocin DS Suspension",
+          "score": 0.18
+        }
+      ]
+    }
+  ],
+  "not_available": [],
+  "notes": "Two lines need the clerk: 'pan dee' (Pan-D or Pantop-D) and the unnamed children's syrup.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}

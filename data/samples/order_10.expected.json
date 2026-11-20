@@ -1,0 +1,68 @@
+{
+  "message_id": "msg_10",
+  "chemist_id": "CH072",
+  "language": "hi",
+  "transcript": "Dolo 650 30 strip, crocin 650 20, pacimol 650 20 aur orsl orange 12 bottle bhej do",
+  "lines": [
+    {
+      "raw_text": "dolo 650",
+      "sku_id": "SKU0001",
+      "brand": "Dolo 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 30,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "crocin 650",
+      "sku_id": "SKU0006",
+      "brand": "Crocin 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 20,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "pacimol 650",
+      "sku_id": "SKU0012",
+      "brand": "Pacimol 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 20,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "orsl orange",
+      "sku_id": "SKU0081",
+      "brand": "ORSL Orange",
+      "strength": "200 ml",
+      "form": "syrup",
+      "molecule": "Oral Rehydration Salts",
+      "group": "heat",
+      "qty": 12,
+      "unit": "bottle",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    }
+  ],
+  "not_available": [],
+  "notes": "Fever-medicine order.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}

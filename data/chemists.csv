@@ -1,0 +1,151 @@
+chemist_id,shop_name,owner_first_name,pin,lat,lng,language,software
+CH001,Rohit Medical Stores,Mohammed,400070,19.07207,72.88321,mr,marg
+CH002,Al-Shifa Medical & General Stores,Meena,400070,19.07719,72.87745,hi,other
+CH003,Lifeline Medico,Imran,400070,19.07155,72.88302,hi,paper
+CH004,Madina Pharmacy,Nilesh,400070,19.07166,72.88471,hi,paper
+CH005,Jeevan Medical Stores,Irfan,400070,19.07077,72.88016,hi,paper
+CH006,Gupta Medical & General Stores,Naseem,400070,19.06899,72.87649,hi,paper
+CH007,Kohinoor Medical Stores,Vijay,400070,19.07168,72.87983,hi,other
+CH008,Shree Ganesh Medical Stores,Sanjay,400070,19.07557,72.87546,hi,paper
+CH009,Swami Samarth Medical,Irfan,400070,19.07007,72.88099,hi,marg
+CH010,Siddhivinayak Medico,Salim,400024,19.07585,72.89281,hi,paper
+CH011,Navjeevan Drug House,Salim,400024,19.0757,72.8963,hi,paper
+CH012,Madina Medical,Dinesh,400024,19.0741,72.88674,hi,paper
+CH013,Shiv Medical,Salim,400024,19.07584,72.89172,mr,paper
+CH014,Prakash Medico,Prakash,400024,19.07867,72.89231,mr,marg
+CH015,Navjeevan Medical,Mohammed,400024,19.07741,72.89232,mr,marg
+CH016,Gupta Medical Stores,Meena,400024,19.07639,72.88704,hi,paper
+CH017,Hind Drug House,Manoj,400024,19.07144,72.88787,hi,marg
+CH018,Shree Datta Medical Stores,Anwar,400022,19.04997,72.87005,mr,paper
+CH019,Shiv Chemist,Nilesh,400022,19.0463,72.86763,mr,paper
+CH020,Unity Medical & General Stores,Rakesh,400022,19.04289,72.86453,hi,marg
+CH021,Lifeline Medical,Abdul,400022,19.04747,72.86692,hi,other
+CH022,Amar Medical,Neha,400022,19.05005,72.87095,mr,other
+CH023,Shree Datta Drug House,Nilesh,400022,19.04611,72.86173,mr,paper
+CH024,Kohinoor Medical,Rupali,400022,19.05018,72.86877,hi,other
+CH025,Shree Ganesh Chemist,Nasir,400022,19.04939,72.86224,mr,other
+CH026,Sai Baba Medical & General Stores,Farhan,400037,19.02094,72.86514,hi,paper
+CH027,Bharat Medical Stores,Manoj,400037,19.02645,72.86621,mr,other
+CH028,Gupta Chemist,Nilesh,400037,19.024,72.86725,mr,paper
+CH029,Star Pharmacy,Deepak,400037,19.02124,72.8663,hi,paper
+CH030,Star Chemist,Vikas,400037,19.02251,72.86381,mr,paper
+CH031,Royal Pharmacy,Irfan,400037,19.02679,72.86558,mr,paper
+CH032,Hind Pharmacy,Abdul,400037,19.02924,72.86005,en,paper
+CH033,Lifeline Medical & General Stores,Mahesh,400017,19.0414,72.85693,mr,paper
+CH034,Lifeline Drug House,Deepak,400017,19.03866,72.85193,en,marg
+CH035,Kamal Medico,Sunil,400017,19.04528,72.85807,hi,marg
+CH036,Lotus Pharmacy,Irfan,400017,19.04089,72.85096,en,paper
+CH037,Aarogya Pharmacy,Ashok,400017,19.04646,72.85296,hi,marg
+CH038,Arihant Drug House,Santosh,400017,19.04204,72.85495,hi,paper
+CH039,Wellness Chemist,Jyoti,400017,19.04151,72.85531,en,paper
+CH040,Mauli Medico,Irfan,400017,19.04173,72.85631,mr,other
+CH041,Shree Ganesh Medical & General Stores,Ramesh,400017,19.04221,72.85274,mr,paper
+CH042,Amar Medical & General Stores,Pooja,400019,19.02884,72.85185,mr,paper
+CH043,Shraddha Medical & General Stores,Naseem,400019,19.02934,72.85563,mr,paper
+CH044,Shree Ganesh Pharmacy,Sharmila,400019,19.03076,72.85491,mr,marg
+CH045,Sanjivani Medico,Farhan,400019,19.03161,72.85778,mr,paper
+CH046,Modern Medical & General Stores,Bhavesh,400019,19.0317,72.86174,mr,paper
+CH047,Sai Pharmacy,Archana,400019,19.02427,72.85973,mr,paper
+CH048,Amar Pharmacy,Smita,400019,19.02161,72.85208,hi,marg
+CH049,Balaji Drug House,Meena,400031,19.01867,72.85857,mr,other
+CH050,Navjeevan Medico,Vikas,400031,19.01726,72.85647,mr,paper
+CH051,Mahalaxmi Chemist,Ramesh,400031,19.01521,72.8583,mr,paper
+CH052,Care Plus Chemist,Nilesh,400031,19.02131,72.85628,mr,paper
+CH053,Mauli Medical & General Stores,Vijay,400031,19.01527,72.85986,hi,paper
+CH054,Ambika Medical Stores,Anil,400031,19.01418,72.85779,en,paper
+CH055,Balaji Medical & General Stores,Mahesh,400031,19.01942,72.86109,mr,paper
+CH056,Star Medico,Anil,400071,19.05463,72.89906,mr,paper
+CH057,Madina Drug House,Abdul,400071,19.05114,72.89397,mr,marg
+CH058,Shiv Medical Stores,Mahesh,400071,19.05163,72.89402,en,marg
+CH059,Shiv Drug House,Ketan,400071,19.05347,72.89558,en,marg
+CH060,Navjeevan Chemist,Naseem,400071,19.05108,72.89475,hi,paper
+CH061,Star Medical & General Stores,Hitesh,400071,19.0551,72.90074,mr,paper
+CH062,Janata Medical Stores,Salim,400071,19.05547,72.89982,mr,paper
+CH063,Bharat Medico,Naseem,400071,19.0553,72.89551,hi,paper
+CH064,Kohinoor Drug House,Amit,400088,19.04444,72.93366,hi,other
+CH065,Metro Chemist,Sunil,400088,19.0521,72.93584,hi,paper
+CH066,Shree Krishna Medico,Anwar,400088,19.04936,72.92884,hi,paper
+CH067,Rohit Pharmacy,Ashok,400088,19.05223,72.93113,hi,paper
+CH068,Healthwell Chemist,Kamlesh,400088,19.05095,72.93682,hi,paper
+CH069,Gupta Drug House,Vijay,400088,19.04342,72.93204,en,marg
+CH070,Gupta Medico,Sharmila,400088,19.05024,72.93373,hi,marg
+CH071,Raj Medical & General Stores,Yusuf,400088,19.04326,72.92906,hi,marg
+CH072,Madina Medical Stores,Ashok,400043,19.0586,72.91623,hi,marg
+CH073,Sanjivani Drug House,Kiran,400043,19.05684,72.92233,hi,paper
+CH074,Kohinoor Chemist,Amit,400043,19.05314,72.92368,hi,paper
+CH075,Ambika Chemist,Suresh,400043,19.05716,72.92236,hi,paper
+CH076,Om Sai Medico,Naseem,400043,19.06047,72.91995,hi,paper
+CH077,Rohit Medico,Vikas,400043,19.05275,72.92511,mr,paper
+CH078,Jeevan Drug House,Vikas,400043,19.05343,72.92135,hi,paper
+CH079,Bharat Medical & General Stores,Rupali,400043,19.05653,72.92536,hi,paper
+CH080,Lotus Medical & General Stores,Amit,400086,19.08593,72.91104,mr,paper
+CH081,Sunrise Medical & General Stores,Mahesh,400086,19.08366,72.90641,hi,paper
+CH082,Swami Samarth Medical Stores,Deepak,400086,19.0862,72.90274,mr,marg
+CH083,Sai Medical & General Stores,Farhan,400086,19.08262,72.90589,en,paper
+CH084,Janata Pharmacy,Abdul,400086,19.087,72.9118,mr,other
+CH085,Gurukripa Pharmacy,Sheetal,400086,19.08958,72.91284,mr,marg
+CH086,Modern Medico,Sunil,400086,19.08622,72.90462,hi,paper
+CH087,Royal Medico,Abdul,400086,19.0831,72.90982,mr,marg
+CH088,Shree Datta Pharmacy,Pravin,400077,19.08061,72.92043,mr,paper
+CH089,Jai Ambe Medical,Sanjay,400077,19.08921,72.92047,mr,paper
+CH090,Mahalaxmi Medical,Sachin,400077,19.08196,72.92394,hi,marg
+CH091,Aarogya Chemist,Meena,400077,19.081,72.92664,mr,paper
+CH092,Raj Drug House,Rupali,400077,19.07981,72.92306,mr,marg
+CH093,Unity Chemist,Tushar,400077,19.08407,72.92696,mr,marg
+CH094,Arihant Medico,Shabbir,400077,19.08788,72.92339,hi,marg
+CH095,Metro Medical & General Stores,Prakash,400072,19.10131,72.88361,hi,paper
+CH096,New Jeevan Medico,Santosh,400072,19.09968,72.88739,en,paper
+CH097,Shree Datta Medico,Joseph,400072,19.09867,72.88481,hi,paper
+CH098,Mahalaxmi Medical & General Stores,Vikas,400072,19.09994,72.88827,mr,paper
+CH099,Gupta Pharmacy,Neha,400072,19.09936,72.88855,hi,other
+CH100,Janata Medical & General Stores,Kamlesh,400072,19.09916,72.88398,hi,paper
+CH101,Gurukripa Drug House,Vijay,400072,19.09995,72.88916,hi,paper
+CH102,Mahalaxmi Pharmacy,Irfan,400050,19.06459,72.82814,en,paper
+CH103,Mauli Medical Stores,Kiran,400050,19.06081,72.82423,hi,marg
+CH104,Vighnaharta Chemist,Vijay,400050,19.05596,72.8259,hi,paper
+CH105,Balaji Medical Stores,Mohammed,400050,19.06107,72.82776,en,marg
+CH106,Arihant Chemist,Suresh,400050,19.05796,72.82426,hi,marg
+CH107,Care Plus Medical Stores,Rohit,400050,19.06487,72.82848,hi,marg
+CH108,Shree Ganesh Medical,Abdul,400050,19.06338,72.83222,hi,paper
+CH109,Ambika Medico,Naseem,400051,19.07121,72.8519,hi,marg
+CH110,Unity Medico,Nasir,400051,19.07107,72.85066,mr,paper
+CH111,Om Sai Chemist,Deepak,400051,19.06742,72.84489,mr,marg
+CH112,Care Plus Drug House,Yusuf,400051,19.0628,72.84694,hi,marg
+CH113,Raj Pharmacy,Abdul,400051,19.06378,72.84563,hi,marg
+CH114,Pooja Pharmacy,Yusuf,400051,19.0694,72.84708,hi,paper
+CH115,City Drug House,Sachin,400051,19.06443,72.85216,hi,paper
+CH116,Prakash Medical & General Stores,Shabbir,400055,19.0834,72.86182,mr,paper
+CH117,Modern Pharmacy,Jayesh,400055,19.07805,72.86298,en,paper
+CH118,Wellness Medical Stores,Sunil,400055,19.08033,72.85838,hi,paper
+CH119,Al-Shifa Medical,Prakash,400055,19.08411,72.86135,hi,other
+CH120,Hind Medical Stores,Ramesh,400055,19.07924,72.86045,hi,paper
+CH121,Rohit Medical & General Stores,Sachin,400055,19.0757,72.86276,hi,paper
+CH122,Al-Shifa Pharmacy,Bhavesh,400055,19.07645,72.85473,hi,paper
+CH123,Aarogya Medical & General Stores,Farhan,400069,19.1099,72.86673,mr,marg
+CH124,Rohit Chemist,Salim,400069,19.11054,72.86926,hi,other
+CH125,Metro Drug House,Kamlesh,400069,19.11365,72.87224,mr,marg
+CH126,Noor Drug House,Meena,400069,19.11052,72.86692,hi,paper
+CH127,Jai Ambe Chemist,Rupali,400069,19.11625,72.87327,hi,marg
+CH128,Janata Chemist,Sunil,400069,19.11763,72.86518,hi,other
+CH129,Swami Samarth Drug House,Abdul,400069,19.11195,72.86739,hi,paper
+CH130,Care Plus Medico,Jyoti,400058,19.12064,72.84126,hi,paper
+CH131,Kamal Pharmacy,Shabbir,400058,19.12186,72.84109,hi,marg
+CH132,Hind Medical & General Stores,Salim,400058,19.12446,72.84164,hi,paper
+CH133,Jeevan Medico,Suresh,400058,19.12121,72.84005,en,paper
+CH134,Prakash Chemist,Meena,400058,19.11961,72.83807,en,marg
+CH135,Jeevan Medical,Rupali,400058,19.12248,72.84503,hi,paper
+CH136,Shree Datta Chemist,Anil,400058,19.12168,72.83969,hi,paper
+CH137,Jai Ambe Pharmacy,Suresh,400093,19.1144,72.87826,mr,paper
+CH138,Pooja Medical Stores,Farhan,400093,19.11481,72.88233,hi,paper
+CH139,Sanjivani Medical,Ashok,400093,19.11868,72.88411,hi,paper
+CH140,Sagar Chemist,Ashok,400093,19.11554,72.88142,hi,paper
+CH141,Janata Drug House,Smita,400093,19.11356,72.88037,hi,paper
+CH142,Jai Ambe Medico,Amit,400093,19.11696,72.87653,hi,paper
+CH143,Pooja Drug House,Naseem,400093,19.12231,72.88225,hi,marg
+CH144,Kohinoor Medico,Sachin,400076,19.12075,72.90768,en,paper
+CH145,Bharat Chemist,Imran,400076,19.11713,72.90373,hi,other
+CH146,Gupta Medical,Ashok,400076,19.11807,72.90972,en,paper
+CH147,Shraddha Drug House,Jyoti,400076,19.12092,72.91108,hi,paper
+CH148,Modern Drug House,Ramesh,400076,19.11826,72.90396,hi,other
+CH149,Om Sai Medical & General Stores,Neha,400076,19.11758,72.90291,en,paper
+CH150,Shree Ganesh Drug House,Dinesh,400076,19.12246,72.91009,hi,other

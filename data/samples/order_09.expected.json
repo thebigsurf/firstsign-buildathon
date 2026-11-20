@@ -1,0 +1,98 @@
+{
+  "message_id": "msg_09",
+  "chemist_id": "CH026",
+  "language": "hi",
+  "transcript": "Sir aaj ka order: ors 30, electral 10, metrogyl 400 12 patta, zinc 20 dt 15 strip, sporlac 10 sachet. sporlac pichli baar short tha, is baar zaroor bhejna. bachchon wali ondem syrup 6 bottle",
+  "lines": [
+    {
+      "raw_text": "ors",
+      "sku_id": "SKU0021",
+      "brand": "ORS Sachet (WHO formula)",
+      "strength": "21.8 g",
+      "form": "sachet",
+      "molecule": "Oral Rehydration Salts",
+      "group": "diarrhoea",
+      "qty": 30,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "electral",
+      "sku_id": "SKU0022",
+      "brand": "Electral Powder",
+      "strength": "21.8 g",
+      "form": "sachet",
+      "molecule": "Oral Rehydration Salts",
+      "group": "diarrhoea",
+      "qty": 10,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "metrogyl 400",
+      "sku_id": "SKU0037",
+      "brand": "Metrogyl 400",
+      "strength": "400 mg",
+      "form": "tablet",
+      "molecule": "Metronidazole",
+      "group": "diarrhoea",
+      "qty": 12,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "zinc 20 dt",
+      "sku_id": "SKU0036",
+      "brand": "Zinc Dispersible Tablet",
+      "strength": "20 mg",
+      "form": "tablet",
+      "molecule": "Zinc Sulphate",
+      "group": "diarrhoea",
+      "qty": 15,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "sporlac",
+      "sku_id": "SKU0032",
+      "brand": "Sporlac",
+      "strength": "120 million spores",
+      "form": "sachet",
+      "molecule": "Lactic Acid Bacillus",
+      "group": "diarrhoea",
+      "qty": 10,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "ondem syrup",
+      "sku_id": "SKU0028",
+      "brand": "Ondem Syrup",
+      "strength": "2 mg/5 ml",
+      "form": "syrup",
+      "molecule": "Ondansetron",
+      "group": "diarrhoea",
+      "qty": 6,
+      "unit": "bottle",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    }
+  ],
+  "not_available": [
+    "Sporlac (sender says it was short last time)"
+  ],
+  "notes": "Sporlac was short in the previous delivery; the sender asks for it again.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}

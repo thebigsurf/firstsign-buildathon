@@ -1,0 +1,121 @@
+pin,locality_id,name,landmark,lat,lng,households
+400070,400070-01,Kasaiwada,Near Kurla station (west) subway,19.077,72.88262,1800
+400070,400070-02,Qureshi Nagar,"Off LBS Marg, near the flyover",19.07009,72.88112,2600
+400070,400070-03,Kajupada,"Kurla West, near the nullah",19.07392,72.88418,2100
+400070,400070-04,Bail Bazaar,Market lane near Kurla bus depot,19.07048,72.88348,900
+400070,400070-05,Kamani,Kamani junction chawl cluster,19.0756,72.8822,1500
+400070,400070-06,Hall Road,"Behind Phoenix Marketcity, building cluster",19.07296,72.88333,700
+400024,400024-01,Nehru Nagar,"Kurla East, near Kurla Terminus (LTT) colony",19.07249,72.88971,3200
+400024,400024-02,Bhim Nagar,"Kurla East, near the water tank lane",19.07915,72.89193,1400
+400024,400024-03,Kurla Terminus Colony,Railway quarters near LTT,19.07772,72.89379,800
+400024,400024-04,Kapadia Nagar,Chawl cluster off Kalpana Cinema road,19.07694,72.88757,1900
+400024,400024-05,Sundar Baug,Lane behind Kurla East market,19.07518,72.89579,1100
+400024,400024-06,Shivaji Nagar Kurla,Near Kurla East ST depot,19.07188,72.88847,1700
+400022,400022-01,Pratiksha Nagar,"Sion, BEST colony and surrounding chawls",19.04858,72.86869,2900
+400022,400022-02,Chunabhatti Swadeshi Mill,"Swadeshi Mill compound, Chunabhatti",19.0499,72.86502,2200
+400022,400022-03,Everard Nagar,"Sion-Chunabhatti, near the Eastern Express Highway",19.04031,72.87008,2400
+400022,400022-04,Sion Circle,Market lanes around Sion Circle,19.04935,72.86923,1000
+400022,400022-05,Sion Fort,"Near Sion Fort hill, old building cluster",19.04778,72.86385,900
+400022,400022-06,Sion Hospital Road,Lanes opposite the municipal hospital,19.04036,72.86224,1300
+400037,400037-01,Sangam Nagar,"Antop Hill, hillside slum pocket",19.02182,72.86758,3600
+400037,400037-02,CGS Colony,"Antop Hill, central government quarters",19.0234,72.86291,1500
+400037,400037-03,Koliwada,"Sion Koliwada, fishing community lanes",19.02347,72.86744,1200
+400037,400037-04,Barkat Ali Naka,Antop Hill market junction,19.02353,72.86494,1000
+400037,400037-05,Shaikh Misry Road,Chawl cluster near Antop Hill,19.0279,72.86456,1800
+400037,400037-06,Vidyalankar Lane,Building cluster near the college,19.0263,72.86676,700
+400017,400017-01,Kumbharwada,Dharavi potters' colony,19.0383,72.85059,2100
+400017,400017-02,90 Feet Road,"Dharavi main road, shop-house lanes",19.04495,72.857,2600
+400017,400017-03,Social Nagar,"Dharavi, near the Mahim Sion link road",19.04158,72.85446,3000
+400017,400017-04,Transit Camp,"Dharavi, rehabilitation buildings",19.03924,72.84929,1900
+400017,400017-05,Dharavi Koliwada,Fishing village pocket by the creek,19.03838,72.84971,1100
+400017,400017-06,Muslim Nagar,"Dharavi, dense chawl lanes",19.04683,72.85546,2700
+400019,400019-01,Matunga Labour Camp,"Matunga East, near Dharavi border",19.02673,72.85977,3400
+400019,400019-02,King's Circle,Building cluster near King's Circle station,19.0266,72.86002,1300
+400019,400019-03,Five Gardens,"Matunga East, housing societies",19.02911,72.85599,800
+400019,400019-04,Telang Road,"Matunga East, market and chawls",19.02497,72.85303,1100
+400019,400019-05,Mysore Colony,"Matunga, near the Mysore Association",19.02728,72.85843,600
+400019,400019-06,Matunga Road,Lanes near Matunga Road station,19.02455,72.86121,1500
+400031,400031-01,Wadala Truck Terminal,Truck terminal and surrounding slum lanes,19.01834,72.85529,2800
+400031,400031-02,Bhakti Park,"Wadala East, building cluster",19.01267,72.85474,1200
+400031,400031-03,Sangam Nagar Wadala,"Wadala, near the Sion-Wadala link",19.0187,72.86133,2000
+400031,400031-04,BPT Colony,"Port Trust quarters, Wadala",19.01433,72.85596,1600
+400031,400031-05,Anand Nagar Wadala,"Wadala West, chawl cluster",19.01214,72.85366,1400
+400031,400031-06,Wadala Station Road,Market lane by Wadala Road station,19.0123,72.85907,900
+400071,400071-01,Chembur Camp,"Sindhi colony, near Chembur Camp",19.05222,72.89928,2000
+400071,400071-02,Diamond Garden,"Chembur, society cluster near the garden",19.05813,72.9027,1100
+400071,400071-03,Ghatla Gaon,"Ghatla village, dense lanes",19.05168,72.89817,2500
+400071,400071-04,Chembur Naka,Market junction on the Eastern Freeway side,19.0527,72.89666,1400
+400071,400071-05,Sahakar Nagar,"Chembur, housing society colony",19.05388,72.90139,1300
+400071,400071-06,Tilak Nagar Chembur,"Near Tilak Nagar station, chawls",19.0534,72.89704,1800
+400088,400088-01,Mandala,"Mankhurd, near the creek",19.05188,72.92722,3100
+400088,400088-02,Lallubhai Compound,"Mankhurd, large rehabilitation colony",19.04877,72.9359,3800
+400088,400088-03,Mahul Village,"Mahul, near the refinery belt",19.04993,72.93396,1900
+400088,400088-04,Maharashtra Nagar,"Mankhurd, chawl cluster",19.04363,72.92994,2500
+400088,400088-05,Mankhurd Station Road,Market lane near Mankhurd station,19.04702,72.92845,900
+400088,400088-06,Sathe Nagar,"Mankhurd, near the Deonar side",19.05103,72.93264,2200
+400043,400043-01,Baiganwadi,"Govandi, dense hutment lanes",19.05545,72.91516,3900
+400043,400043-02,Shivaji Nagar Govandi,"Govandi, near the station",19.05201,72.91548,3300
+400043,400043-03,Rafique Nagar,"Govandi, near the Deonar dumping road",19.05918,72.91768,2600
+400043,400043-04,Govandi Station Road,Market lane near Govandi station,19.05739,72.9213,1100
+400043,400043-05,Janta Nagar,"Govandi, chawl cluster",19.0585,72.91611,2000
+400043,400043-06,Kamla Raman Nagar,"Govandi, settlement near Baiganwadi",19.05979,72.91954,2800
+400086,400086-01,Asalpha,"Asalpha village, near the metro station",19.09004,72.91165,2700
+400086,400086-02,Jagdusha Nagar,"Ghatkopar West, near the hill road",19.08126,72.90447,3000
+400086,400086-03,Barve Nagar,"Ghatkopar West, building cluster",19.08234,72.90827,1200
+400086,400086-04,Laxmi Baug,"Ghatkopar West, chawl and market lanes",19.08464,72.91256,1500
+400086,400086-05,Station Road Market,Ghatkopar station market,19.08292,72.90624,800
+400086,400086-06,Kirol Road,"Near Vidyavihar, society cluster",19.08797,72.90646,1000
+400077,400077-01,Pant Nagar,"Ghatkopar East, large chawl colony",19.08801,72.92697,3500
+400077,400077-02,Rajawadi,"Ghatkopar East, near Rajawadi hospital",19.08977,72.92266,1900
+400077,400077-03,Ramabai Ambedkar Nagar,"Ghatkopar East, hillside settlement",19.08143,72.92213,4200
+400077,400077-04,Kamraj Nagar,"Ghatkopar East, near the Eastern Express Highway",19.08064,72.92339,2500
+400077,400077-05,Parsiwadi,"Ghatkopar East, mixed buildings",19.08001,72.92278,1000
+400077,400077-06,Laxmi Nagar Ghatkopar,"Ghatkopar East, chawl lanes",19.08642,72.92317,1700
+400072,400072-01,Sakinaka Junction,Market junction on Andheri-Kurla Road,19.10761,72.8835,1200
+400072,400072-02,Khairani Road,"Sakinaka, small industrial units and chawls",19.09974,72.88819,2800
+400072,400072-03,Jarimari,"Sakinaka, dense lanes near the nullah",19.10552,72.88861,3100
+400072,400072-04,Sangharsh Nagar,"Chandivali-Sakinaka, hillside colony",19.10882,72.88413,3000
+400072,400072-05,Safed Pool,"Under the Safed Pool bridge, lanes around",19.10633,72.89068,1900
+400072,400072-06,Mohili Village,"Sakinaka, village pocket",19.10346,72.88625,1300
+400050,400050-01,Pali Hill,"Bandra West, society cluster",19.05522,72.83269,600
+400050,400050-02,Bandstand,Sea-facing building cluster,19.05712,72.82897,500
+400050,400050-03,Hill Road,"Bandra West, shops and buildings",19.05617,72.82653,900
+400050,400050-04,Bazaar Road,Market lanes near Bandra station,19.057,72.82401,1000
+400050,400050-05,Chimbai Village,"Koliwada pocket, Bandra West",19.05619,72.83189,1100
+400050,400050-06,Ranwar Village,"Bandra West, gaothan lanes",19.05803,72.82518,800
+400051,400051-01,Bharat Nagar,"Bandra East, near the Western Express Highway",19.07074,72.84391,3200
+400051,400051-02,Behrampada,"Bandra East, dense slum pocket",19.07102,72.84527,3800
+400051,400051-03,Garib Nagar,"Bandra East, by the railway line",19.06397,72.84582,2900
+400051,400051-04,Kherwadi,"Bandra East, chawl cluster",19.06788,72.84785,2400
+400051,400051-05,Nirmal Nagar,"Bandra East, housing colony",19.07238,72.84808,1200
+400051,400051-06,Kala Nagar,Near the Bandra Reclamation side,19.06476,72.84371,900
+400055,400055-01,Kalina Village,"Santacruz East, gaothan lanes",19.07458,72.86231,1300
+400055,400055-02,Kolivery Village,"Santacruz East, fishing community",19.08132,72.86263,1000
+400055,400055-03,Golibar,"Santacruz East, dense settlement",19.07684,72.86275,3500
+400055,400055-04,Vakola,"Near Vakola bridge, chawl cluster",19.08281,72.85744,2600
+400055,400055-05,Prabhat Colony,"Santacruz East, housing colony",19.07679,72.85811,1100
+400055,400055-06,Nehru Road,Santacruz East market stretch,19.0817,72.85632,800
+400069,400069-01,Chakala,"Andheri East, near the airport road",19.11742,72.87149,1500
+400069,400069-02,JB Nagar,"Andheri East, mixed chawls and buildings",19.11829,72.86931,2800
+400069,400069-03,Marol Maroshi Road,"Andheri East, shops and chawls",19.1102,72.87139,1600
+400069,400069-04,Telli Galli,"Andheri East, old lanes",19.1149,72.86974,900
+400069,400069-05,Gundavali,"Andheri East, near the metro station",19.11425,72.86768,1200
+400069,400069-06,Sahar Road,"Andheri East, near the airport",19.11428,72.87279,1400
+400058,400058-01,Azad Nagar,"Andheri West, market and chawls",19.12588,72.83988,2600
+400058,400058-02,DN Nagar,"Andheri West, society cluster",19.12693,72.84393,1100
+400058,400058-03,Four Bungalows,"Andheri West, residential lanes",19.12698,72.83576,900
+400058,400058-04,Versova Koliwada,Fishing community by the beach,19.12355,72.84186,1700
+400058,400058-05,Amboli,"Andheri West, near the Western Express Highway",19.12539,72.8363,1500
+400058,400058-06,Seven Bungalows,"Andheri West, seafront buildings",19.12492,72.8412,700
+400093,400093-01,Marol Village,Marol gaothan lanes,19.1165,72.8798,1900
+400093,400093-02,Mahakali Caves Road,Chawl cluster along the caves road,19.11822,72.88186,2200
+400093,400093-03,SEEPZ Gate,Lanes around the SEEPZ gate,19.11827,72.88385,1000
+400093,400093-04,Marol Naka,"Marol junction, market and chawls",19.11431,72.87872,1800
+400093,400093-05,Hanuman Nagar Marol,Hillside settlement near MIDC,19.12054,72.87628,2400
+400093,400093-06,MIDC Road,Industrial estate worker housing,19.11893,72.87797,1300
+400076,400076-01,Hiranandani Gardens,"Powai, large society township",19.12101,72.90486,1200
+400076,400076-02,Chandivali,"Powai, village and chawl pocket",19.11707,72.91053,2300
+400076,400076-03,Saki Vihar Road,"Powai, residential and shops",19.12157,72.90183,1000
+400076,400076-04,Powai Lake side,Lanes near the lake,19.11511,72.91024,800
+400076,400076-05,Jai Bhim Nagar,"Powai, large settlement near the hills",19.11548,72.90193,4000
+400076,400076-06,Tunga Village,"Powai, gaothan lanes",19.11508,72.90447,1100

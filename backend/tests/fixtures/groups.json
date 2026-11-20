@@ -1,0 +1,37 @@
+[
+ {
+  "id": "fever",
+  "label": "Fever",
+  "label_hi": "बुखार",
+  "color_hint": "#e11d48",
+  "is_chronic": false
+ },
+ {
+  "id": "diarrhoea",
+  "label": "Diarrhoea and vomiting",
+  "label_hi": "दस्त",
+  "color_hint": "#0284c7",
+  "is_chronic": false
+ },
+ {
+  "id": "respiratory",
+  "label": "Cough, cold and breathing",
+  "label_hi": "खाँसी",
+  "color_hint": "#7c3aed",
+  "is_chronic": false
+ },
+ {
+  "id": "chronic_bp",
+  "label": "Blood pressure",
+  "label_hi": "बीपी",
+  "color_hint": "#475569",
+  "is_chronic": true
+ },
+ {
+  "id": "other",
+  "label": "Other",
+  "label_hi": "अन्य",
+  "color_hint": "#94a3b8",
+  "is_chronic": false
+ }
+]

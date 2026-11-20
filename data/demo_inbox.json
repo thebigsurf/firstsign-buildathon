@@ -1,0 +1,92 @@
+[
+  {
+    "id": "msg_01",
+    "chemist_id": "CH002",
+    "received_at": "2026-11-20T07:12:00+05:30",
+    "type": "voice",
+    "text": null,
+    "media": "samples/order_01.mp3",
+    "expected": "samples/order_01.expected.json"
+  },
+  {
+    "id": "msg_02",
+    "chemist_id": "CH020",
+    "received_at": "2026-11-20T07:31:00+05:30",
+    "type": "voice",
+    "text": null,
+    "media": "samples/order_02.mp3",
+    "expected": "samples/order_02.expected.json"
+  },
+  {
+    "id": "msg_03",
+    "chemist_id": "CH018",
+    "received_at": "2026-11-20T07:48:00+05:30",
+    "type": "voice",
+    "text": null,
+    "media": "samples/order_03.mp3",
+    "expected": "samples/order_03.expected.json"
+  },
+  {
+    "id": "msg_04",
+    "chemist_id": "CH010",
+    "received_at": "2026-11-20T08:05:00+05:30",
+    "type": "voice",
+    "text": null,
+    "media": "samples/order_04.mp3",
+    "expected": "samples/order_04.expected.json"
+  },
+  {
+    "id": "msg_05",
+    "chemist_id": "CH021",
+    "received_at": "2026-11-20T08:20:00+05:30",
+    "type": "photo",
+    "text": null,
+    "media": "samples/order_05.jpg",
+    "expected": "samples/order_05.expected.json"
+  },
+  {
+    "id": "msg_06",
+    "chemist_id": "CH037",
+    "received_at": "2026-11-20T08:34:00+05:30",
+    "type": "photo",
+    "text": null,
+    "media": "samples/order_06.jpg",
+    "expected": "samples/order_06.expected.json"
+  },
+  {
+    "id": "msg_07",
+    "chemist_id": "CH064",
+    "received_at": "2026-11-20T08:47:00+05:30",
+    "type": "photo",
+    "text": null,
+    "media": "samples/order_07.jpg",
+    "expected": "samples/order_07.expected.json"
+  },
+  {
+    "id": "msg_08",
+    "chemist_id": "CH004",
+    "received_at": "2026-11-20T08:52:00+05:30",
+    "type": "text",
+    "text": "bhai ors 25 aur electral 12 bhej dena, norflox tz 10 strip, ondem 4 ke 8 patte. kal ka payment friday ko kar dunga",
+    "media": null,
+    "expected": "samples/order_08.expected.json"
+  },
+  {
+    "id": "msg_09",
+    "chemist_id": "CH026",
+    "received_at": "2026-11-20T09:03:00+05:30",
+    "type": "text",
+    "text": "Sir aaj ka order: ors 30, electral 10, metrogyl 400 12 patta, zinc 20 dt 15 strip, sporlac 10 sachet. sporlac pichli baar short tha, is baar zaroor bhejna. bachchon wali ondem syrup 6 bottle",
+    "media": null,
+    "expected": "samples/order_09.expected.json"
+  },
+  {
+    "id": "msg_10",
+    "chemist_id": "CH072",
+    "received_at": "2026-11-20T09:11:00+05:30",
+    "type": "text",
+    "text": "Dolo 650 30 strip, crocin 650 20, pacimol 650 20 aur orsl orange 12 bottle bhej do",
+    "media": null,
+    "expected": "samples/order_10.expected.json"
+  }
+]

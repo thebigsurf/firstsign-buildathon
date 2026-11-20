@@ -1,0 +1,252 @@
+{
+  "generated_for": "FirstSign back-test on SIMULATED data",
+  "as_of": "2026-11-19",
+  "rule": "pharmacy alert = 7-day units / median of the 28 preceding 7-day windows > 1.5 AND breadth > 40% (share of the pin's active chemists whose own 7-day units exceed 1.6x their own baseline) AND volume floor (7-day units >= 60, baseline >= 25). Evaluated daily for fever, diarrhoea, respiratory, allergy.",
+  "asha_rule": "rolling 4-day households with the symptom per household visited > 2.5x the pin's prior 28-day rate and >= 5 households",
+  "official_rule": "first weekly IDSP-like count >= max(1.6 x median of previous 6 weeks, median + 4 x sqrt(median))",
+  "caveat": "Official counts for weeks reported after 2026-11-19 (and the weeks starting 23 and 30 Nov) are PROJECTED simulated values (report_date after 2026-11-19); the back-test for the two live events is therefore a replay of a simulated scenario, not an observed result. Real literature leads: none to ~2 weeks, weakest for antidiarrhoeals (see research_day1/R5).",
+  "events": [
+    {
+      "event": "E1_diarrhoea_waterborne",
+      "group": "diarrhoea",
+      "syndrome": "acute_diarrhoeal_disease",
+      "pharmacy_story_start": "2026-11-14",
+      "first_pharmacy_alert_date": "2026-11-16",
+      "per_pin": [
+        {
+          "pin": 400022,
+          "area": "Sion / Chunabhatti",
+          "pharmacy_alert_date": "2026-11-16",
+          "pharmacy_peak_ratio": 3.42,
+          "asha_rise_date": "2026-11-18",
+          "official_first_elevated_week_start": "2026-11-16",
+          "official_report_date": "2026-11-25",
+          "official_projected": true,
+          "lead_vs_asha_days": 2,
+          "lead_vs_official_week_start_days": 0,
+          "lead_vs_official_report_date_days": 9
+        },
+        {
+          "pin": 400070,
+          "area": "Kurla West",
+          "pharmacy_alert_date": "2026-11-17",
+          "pharmacy_peak_ratio": 2.06,
+          "asha_rise_date": "2026-11-19",
+          "official_first_elevated_week_start": "2026-11-23",
+          "official_report_date": "2026-12-04",
+          "official_projected": true,
+          "lead_vs_asha_days": 2,
+          "lead_vs_official_week_start_days": 6,
+          "lead_vs_official_report_date_days": 17
+        },
+        {
+          "pin": 400024,
+          "area": "Kurla East / Nehru Nagar",
+          "pharmacy_alert_date": "2026-11-17",
+          "pharmacy_peak_ratio": 2.01,
+          "asha_rise_date": null,
+          "official_first_elevated_week_start": "2026-11-23",
+          "official_report_date": "2026-12-05",
+          "official_projected": true,
+          "lead_vs_official_week_start_days": 6,
+          "lead_vs_official_report_date_days": 18
+        },
+        {
+          "pin": 400037,
+          "area": "Antop Hill / Sion Koliwada",
+          "pharmacy_alert_date": null,
+          "pharmacy_peak_ratio": 1.37,
+          "asha_rise_date": "2026-11-18",
+          "official_first_elevated_week_start": null,
+          "official_report_date": null,
+          "official_projected": null
+        }
+      ]
+    },
+    {
+      "event": "E2_dengue_like_fever",
+      "group": "fever",
+      "syndrome": "fever_dengue_like",
+      "pharmacy_story_start": "2026-11-10",
+      "first_pharmacy_alert_date": "2026-11-15",
+      "per_pin": [
+        {
+          "pin": 400088,
+          "area": "Mankhurd",
+          "pharmacy_alert_date": "2026-11-16",
+          "pharmacy_peak_ratio": 2.19,
+          "asha_rise_date": "2026-11-16",
+          "official_first_elevated_week_start": "2026-11-16",
+          "official_report_date": "2026-11-28",
+          "official_projected": true,
+          "lead_vs_asha_days": 0,
+          "lead_vs_official_week_start_days": 0,
+          "lead_vs_official_report_date_days": 12
+        },
+        {
+          "pin": 400043,
+          "area": "Govandi",
+          "pharmacy_alert_date": "2026-11-15",
+          "pharmacy_peak_ratio": 2.23,
+          "asha_rise_date": "2026-11-17",
+          "official_first_elevated_week_start": "2026-11-16",
+          "official_report_date": "2026-11-27",
+          "official_projected": true,
+          "lead_vs_asha_days": 2,
+          "lead_vs_official_week_start_days": 1,
+          "lead_vs_official_report_date_days": 12
+        }
+      ]
+    }
+  ],
+  "decoy_ors_scheme": {
+    "pin": 400086,
+    "chemist": "CH082",
+    "scheme_id": "SCH001",
+    "peak_7d_ratio": 2.91,
+    "peak_breadth": 0.33,
+    "alert_fired": false,
+    "note": "High volume, low breadth: the rule must NOT alert. alert_fired=false is the desired outcome."
+  },
+  "false_alarm": {
+    "group": "respiratory",
+    "cause": "citywide bad-air week (PM2.5 rise), not an infectious outbreak",
+    "pins_alerting": [
+      {
+        "pin": 400024,
+        "alert_date": "2026-11-13",
+        "official_elevated": false,
+        "asha_cough_rise_date": null
+      },
+      {
+        "pin": 400022,
+        "alert_date": "2026-11-17",
+        "official_elevated": false,
+        "asha_cough_rise_date": null
+      },
+      {
+        "pin": 400017,
+        "alert_date": "2026-11-16",
+        "official_elevated": false,
+        "asha_cough_rise_date": null
+      },
+      {
+        "pin": 400019,
+        "alert_date": "2026-11-15",
+        "official_elevated": false,
+        "asha_cough_rise_date": null
+      },
+      {
+        "pin": 400076,
+        "alert_date": "2026-11-16",
+        "official_elevated": false,
+        "asha_cough_rise_date": null
+      }
+    ],
+    "verdict": "Pharmacy rule fired in pins listed; official ARI counts stay within normal range and ASHA cough bump is mild and short. The app should show 'region-wide, discounted' rather than an outbreak."
+  },
+  "other_pharmacy_alerts_outside_stories": [
+    {
+      "pin": 400017,
+      "group": "allergy",
+      "first_alert": "2026-10-22",
+      "days_alerting": 1
+    },
+    {
+      "pin": 400019,
+      "group": "diarrhoea",
+      "first_alert": "2026-11-19",
+      "days_alerting": 1
+    },
+    {
+      "pin": 400019,
+      "group": "allergy",
+      "first_alert": "2026-11-10",
+      "days_alerting": 2
+    },
+    {
+      "pin": 400043,
+      "group": "diarrhoea",
+      "first_alert": "2026-10-16",
+      "days_alerting": 1
+    },
+    {
+      "pin": 400043,
+      "group": "allergy",
+      "first_alert": "2026-11-09",
+      "days_alerting": 2
+    },
+    {
+      "pin": 400086,
+      "group": "diarrhoea",
+      "first_alert": "2026-11-06",
+      "days_alerting": 1
+    },
+    {
+      "pin": 400050,
+      "group": "fever",
+      "first_alert": "2026-10-03",
+      "days_alerting": 2
+    },
+    {
+      "pin": 400050,
+      "group": "diarrhoea",
+      "first_alert": "2026-10-13",
+      "days_alerting": 6
+    },
+    {
+      "pin": 400055,
+      "group": "diarrhoea",
+      "first_alert": "2026-11-06",
+      "days_alerting": 1
+    },
+    {
+      "pin": 400076,
+      "group": "allergy",
+      "first_alert": "2026-11-08",
+      "days_alerting": 3
+    }
+  ],
+  "missed_event": {
+    "event": "Typhoid / enteric fever cluster, Dharavi 400017",
+    "official_first_elevated_week_start": "2026-10-05",
+    "official_report_date": "2026-10-18",
+    "peak_typhoid_lab_positivity_pct": 18.1,
+    "pharmacy_fever_peak_ratio_in_window": 1.28,
+    "pharmacy_alert_fired": false,
+    "why_missed": "Typhoid is treated on prescription antibiotics from clinics and labs; OTC fever and diarrhoea volumes barely move, so the pharmacy signal stays under threshold."
+  },
+  "lead_stats": {
+    "lead_vs_asha_days": [
+      2,
+      2,
+      0,
+      2
+    ],
+    "lead_vs_official_week_start_days": [
+      0,
+      6,
+      6,
+      0,
+      1
+    ],
+    "lead_vs_official_report_date_days": [
+      9,
+      17,
+      18,
+      12,
+      12
+    ],
+    "median_lead_vs_official_report_date": 12.0,
+    "median_lead_vs_asha": 2.0
+  },
+  "reconciliation": {
+    "cells": 19800,
+    "cells_exact": 19800,
+    "max_abs_diff": 0,
+    "total_history_units": 629834,
+    "total_line_units": 629834,
+    "chemists_ordering_exact": 19800,
+    "chemists_ordering_cells": 19800
+  }
+}

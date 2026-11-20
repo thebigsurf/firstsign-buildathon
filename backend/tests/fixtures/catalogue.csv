@@ -1,0 +1,10 @@
+sku_id,brand,strength,form,pack,molecule,group,unit,aliases
+S1,Dolo 650,650 mg,tablet,15 tablets,Paracetamol,fever,strip,dolo 650|dolo650|dolo sau pachas
+S2,Dolo 500,500 mg,tablet,15 tablets,Paracetamol,fever,strip,dolo 500|dolo500
+S3,Crocin 500,500 mg,tablet,15 tablets,Paracetamol,fever,strip,crocin|crocin 500|krosin
+S4,ORS Sachet,21.8 g,sachet,1 sachet,Oral Rehydration Salts,diarrhoea,sachet,ors|o r s|ors sachet
+S5,Electral Powder,21.8 g,sachet,1 sachet,Oral Rehydration Salts,diarrhoea,sachet,electral|electrol|ilectral
+S6,Pan-D,40 mg,tablet,15 tablets,Pantoprazole + Domperidone,other,strip,pan d|pan-d|pan dee|pantop d
+S7,Pan 40,40 mg,tablet,15 tablets,Pantoprazole,other,strip,pan 40|pan forty
+S8,Amlong 5,5 mg,tablet,15 tablets,Amlodipine,chronic_bp,strip,amlong|amlong 5
+S9,Benadryl,100 ml,syrup,100 ml,Diphenhydramine,respiratory,bottle,benadryl|benadril|benadryl syrup

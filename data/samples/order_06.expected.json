@@ -1,0 +1,112 @@
+{
+  "message_id": "msg_06",
+  "chemist_id": "CH037",
+  "language": "en",
+  "transcript": "Dolo 650   20\nAzithral 500   10\nAugmentin 625   8\nMontair LC   10\nAsthalin inhaler   5\nCalpol syp   6",
+  "lines": [
+    {
+      "raw_text": "Dolo 650",
+      "sku_id": "SKU0001",
+      "brand": "Dolo 650",
+      "strength": "650 mg",
+      "form": "tablet",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 20,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Azithral 500",
+      "sku_id": "SKU0053",
+      "brand": "Azithral 500",
+      "strength": "500 mg",
+      "form": "tablet",
+      "molecule": "Azithromycin",
+      "group": "respiratory",
+      "qty": 10,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Augmentin 625",
+      "sku_id": "SKU0056",
+      "brand": "Augmentin 625 Duo",
+      "strength": "500 mg + 125 mg",
+      "form": "tablet",
+      "molecule": "Amoxicillin + Clavulanic Acid",
+      "group": "respiratory",
+      "qty": 8,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Montair LC",
+      "sku_id": "SKU0046",
+      "brand": "Montair-LC",
+      "strength": "10 mg + 5 mg",
+      "form": "tablet",
+      "molecule": "Montelukast + Levocetirizine",
+      "group": "respiratory",
+      "qty": 10,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Asthalin inhaler",
+      "sku_id": "SKU0060",
+      "brand": "Asthalin Inhaler",
+      "strength": "100 mcg/dose",
+      "form": "inhaler",
+      "molecule": "Salbutamol",
+      "group": "respiratory",
+      "qty": 5,
+      "unit": "box",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "Calpol syp",
+      "sku_id": "SKU0010",
+      "brand": "Calpol 120 Suspension",
+      "strength": "120 mg/5 ml",
+      "form": "syrup",
+      "molecule": "Paracetamol",
+      "group": "fever",
+      "qty": 6,
+      "unit": "bottle",
+      "confidence": 0.55,
+      "status": "uncertain",
+      "alternatives": [
+        {
+          "sku_id": "SKU0010",
+          "brand": "Calpol 120 Suspension",
+          "score": 0.45
+        },
+        {
+          "sku_id": "SKU0011",
+          "brand": "Calpol 250 Suspension",
+          "score": 0.3
+        },
+        {
+          "sku_id": "SKU0003",
+          "brand": "Dolo 120 Suspension",
+          "score": 0.1
+        }
+      ]
+    }
+  ],
+  "not_available": [],
+  "notes": "'Calpol syp' could be the 120 mg or the 250 mg suspension; the clerk must choose.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}

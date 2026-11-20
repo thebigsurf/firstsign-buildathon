@@ -1,0 +1,12 @@
+# Used by "gcloud run deploy --source". Not .gitignore, so the warm Gemini cache (backend/.cache) is uploaded.
+.git
+.env
+.env.*
+!.env.example
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+.venv
+frontend/node_modules
+frontend/dist
+backend/.state

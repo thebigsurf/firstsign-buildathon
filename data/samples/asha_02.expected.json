@@ -1,0 +1,16 @@
+{
+  "asha_id": "ASHA05",
+  "locality_id": "400022-01",
+  "language": "mr",
+  "transcript": "आज मी प्रतीक्षा नगरमध्ये पंधरा घरांना भेट दिली. आठ घरांत जुलाब आणि उलट्या आहेत, चार लहान मुले आहेत. दोन जणांना सायन रुग्णालयात पाठवले. नळाचे पाणी पिवळसर येत आहे असे लोक सांगतात.",
+  "households_visited": 15,
+  "fever": 0,
+  "diarrhoea": 8,
+  "cough": 0,
+  "breathing": 0,
+  "rash": 0,
+  "children_affected": 4,
+  "referred": 2,
+  "water_issue_reported": true,
+  "notes": "Diarrhoea and vomiting. Residents say tap water is yellowish. Two people sent to Sion hospital."
+}

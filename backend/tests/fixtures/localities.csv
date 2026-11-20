@@ -1,0 +1,7 @@
+pin,locality_id,name,landmark,lat,lng,households
+400001,400001-01,Lane One,By the water tank,19.0001,72.8001,900
+400001,400001-02,Lane Two,Near the school,19.0002,72.8002,400
+400002,400002-01,Chawl Block,Behind the market,19.0091,72.8001,1200
+400002,400002-02,Hill Side,Above the nullah,19.0092,72.8002,700
+400003,400003-01,Park Row,Opposite the park,19.1501,72.9501,500
+400004,400004-01,Road End,Near the bus stop,19.3001,72.7001,300

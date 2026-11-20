@@ -1,0 +1,16 @@
+{
+  "asha_id": "ASHA11",
+  "locality_id": "400086-01",
+  "language": "hi",
+  "transcript": "आज असल्फा में बारह घर गई। सब ठीक है। दो घरों में हल्की खाँसी है, दस्त या बुखार किसी को नहीं। पानी साफ आ रहा है।",
+  "households_visited": 12,
+  "fever": 0,
+  "diarrhoea": 0,
+  "cough": 2,
+  "breathing": 0,
+  "rash": 0,
+  "children_affected": 0,
+  "referred": 0,
+  "water_issue_reported": false,
+  "notes": "Nothing unusual. Two households with mild cough. Water is clean."
+}

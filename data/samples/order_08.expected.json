@@ -1,0 +1,68 @@
+{
+  "message_id": "msg_08",
+  "chemist_id": "CH004",
+  "language": "hi",
+  "transcript": "bhai ors 25 aur electral 12 bhej dena, norflox tz 10 strip, ondem 4 ke 8 patte. kal ka payment friday ko kar dunga",
+  "lines": [
+    {
+      "raw_text": "ors",
+      "sku_id": "SKU0021",
+      "brand": "ORS Sachet (WHO formula)",
+      "strength": "21.8 g",
+      "form": "sachet",
+      "molecule": "Oral Rehydration Salts",
+      "group": "diarrhoea",
+      "qty": 25,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "electral",
+      "sku_id": "SKU0022",
+      "brand": "Electral Powder",
+      "strength": "21.8 g",
+      "form": "sachet",
+      "molecule": "Oral Rehydration Salts",
+      "group": "diarrhoea",
+      "qty": 12,
+      "unit": "sachet",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "norflox tz",
+      "sku_id": "SKU0023",
+      "brand": "Norflox-TZ",
+      "strength": "400 mg + 600 mg",
+      "form": "tablet",
+      "molecule": "Norfloxacin + Tinidazole",
+      "group": "diarrhoea",
+      "qty": 10,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    },
+    {
+      "raw_text": "ondem 4",
+      "sku_id": "SKU0027",
+      "brand": "Ondem 4",
+      "strength": "4 mg",
+      "form": "tablet",
+      "molecule": "Ondansetron",
+      "group": "diarrhoea",
+      "qty": 8,
+      "unit": "strip",
+      "confidence": 0.95,
+      "status": "matched",
+      "alternatives": []
+    }
+  ],
+  "not_available": [],
+  "notes": "The payment promise is a remark, not an order item.",
+  "model": "ground_truth",
+  "latency_ms": 0
+}
