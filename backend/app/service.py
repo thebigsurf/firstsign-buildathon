@@ -357,7 +357,8 @@ class Services:
             body.approved_by, "action_approved", body.alert_id,
             f"Approved {body.action.replace('_', ' ')} for {body.alert_id} {how}.",
             before={"text": original}, after={"text": final},
-            detail={"action": body.action, "edited": approval.edited, "model": explanation.model},
+            detail={"action": body.action, "edited": approval.edited, "model": explanation.model,
+                    "approved_text": final},
         )
         return approval
 

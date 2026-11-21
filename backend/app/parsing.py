@@ -426,6 +426,8 @@ def parse_order(
     canned_lines: list[OrderLine] | None = None
 
     if gemini.offline:
+        if upload is not None:
+            detect_mime(upload, ("audio", "image"))  # same media checks as live: junk is a 400, not a 200
         canned = _canned_order(gemini, upload, expected_hint)
         if canned is not None:
             out, model_name = coerce_order_output(canned), "offline-sample"

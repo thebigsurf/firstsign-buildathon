@@ -90,7 +90,7 @@ def test_offline_text_order_end_to_end(fixture_ctx: AppContext) -> None:
 
 
 def test_offline_unknown_media_returns_empty_with_a_note(fixture_ctx: AppContext) -> None:
-    parsed = parse_order(fixture_ctx.gemini, fixture_ctx.catalogue, CHEMIST, upload=Upload(b"zz", "mystery.ogg"))
+    parsed = parse_order(fixture_ctx.gemini, fixture_ctx.catalogue, CHEMIST, upload=Upload(b"OggS" + b"zz" * 8, "mystery.ogg"))
     assert parsed.lines == [] and "not one of the bundled samples" in parsed.notes
 
 

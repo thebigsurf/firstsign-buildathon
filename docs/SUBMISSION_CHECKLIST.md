@@ -6,7 +6,7 @@ Deadline: **9:00 AM IST, 21 Nov 2026**. Submit: working link, pitch deck (PDF un
 
 | Item | State |
 |---|---|
-| Code | Ready. 120 backend tests; frontend tsc, lint, 27 vitest and build pass. Not pushed (no git was run overnight) |
+| Code | Ready. 135 backend tests; frontend tsc, lint, 41 vitest and build pass. Not pushed (no git was run overnight) |
 | Working link | NOT live. Needs billing, gcloud login and deploy |
 | Deck | Source is `docs/DECK.md`; new screenshots are the numbered files 01 to 11 in `docs/screens/`. Slides not built |
 | Video | Done: `docs/video/FirstSign_demo.mp4` (2:16) and `FirstSign_demo_captions.srt` |

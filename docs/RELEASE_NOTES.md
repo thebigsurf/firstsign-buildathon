@@ -20,8 +20,8 @@ All history, chemists, ASHA reports, official cases and lab data are SIMULATED a
 
 | Check | Result |
 |---|---|
-| Backend pytest | 120 passed (about 44 s) |
-| Frontend tsc, eslint, vitest, build | all clean; 27 vitest tests |
+| Backend pytest | 135 passed (about 45 s) |
+| Frontend tsc, eslint, vitest, build | all clean; 41 vitest tests |
 | Axe (frontend round) | 0 violations, 9 routes, desktop and phone, light and dark |
 | Playwright, 9 routes at 1440 and 390 (this pass) | 0 console errors, 0 horizontal overflow, one h1 per page; shots in `docs/qa_screens/final/` |
 | Story via API on port 8120 | all 10 messages parsed, approve, duplicate 409, audit, 3 explanations, chemist send (text and voice), media round trip, two ASHA reports confirm the Kurla alert |
@@ -39,7 +39,7 @@ All history, chemists, ASHA reports, official cases and lab data are SIMULATED a
 
 - Cached explanations were keyed on live counts, so approving any order (for example msg_09) made all three miss. With Gemini failing (HTTP 402) the page then showed the plain data-only text. The last good Gemini explanation per alert is now saved (`backend/.cache/explain_last_<alert>.json`) and shown, labelled, when Gemini is down. Test added; verified after approving msg_01, msg_02 and msg_09.
 - The alert page said "Explained by Gemini with Google Search" even with no sources. It now says "from our order data" unless the answer is grounded.
-- Stale docs fixed: test count (120), the two-report ASHA rule, the msg_03 note.
+- Stale docs fixed: test count (135), the two-report ASHA rule, the msg_03 note.
 
 ## Known limits (honest)
 

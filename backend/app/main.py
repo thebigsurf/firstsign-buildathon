@@ -28,6 +28,24 @@ from .store import Store
 log = logging.getLogger("firstsign")
 MAX_REQUEST_BYTES = 25 * 1024 * 1024  # 20 MB of media plus form overhead
 
+# Origins the app really uses: Google Fonts (css + font files) and OpenStreetMap tiles. The inline script in
+# index.html (theme bootstrap) and Leaflet's inline styles need 'unsafe-inline'.
+CSP = ("default-src 'self'; "
+       "script-src 'self' 'unsafe-inline'; "
+       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+       "font-src 'self' data: https://fonts.gstatic.com; "
+       "img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; "
+       "media-src 'self' blob:; "
+       "connect-src 'self'; "
+       "object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Strict-Transport-Security": "max-age=31536000",
+}
+_DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")  # Swagger UI loads scripts from a CDN, so no CSP there
+
 
 class JsonFormatter(logging.Formatter):
     """One JSON object per log line, with the request id when there is one."""
@@ -88,6 +106,17 @@ def create_app(settings: Settings | None = None, store: Store | None = None) -> 
         if request.url.path.startswith("/api"):
             log.info("request", extra={"request_id": rid, "method": request.method, "path": request.url.path,
                                        "status": response.status_code, "ms": int((time.perf_counter() - started) * 1000)})
+        return response
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):  # type: ignore[no-untyped-def]
+        response = await call_next(request)
+        for key, value in SECURITY_HEADERS.items():
+            response.headers[key] = value
+        if not request.url.path.startswith(_DOCS_PATHS):
+            response.headers["Content-Security-Policy"] = CSP
+        else:
+            response.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
         return response
 
     @app.exception_handler(AppError)

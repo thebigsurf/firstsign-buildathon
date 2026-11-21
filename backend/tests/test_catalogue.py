@@ -23,7 +23,10 @@ def test_spoken_alias_is_matched_without_model_help(fixture_catalogue: Catalogue
     result = fixture_catalogue.validate_line(line("dolo sau pachas", None, conf=0.9))
     assert result.sku_id == "S1"
     assert result.status in {"matched", "uncertain"}
-    assert "Gemini could not pick" in (result.reason or "")
+    if result.status == "matched":
+        assert "could not pick" not in (result.reason or "")
+    else:
+        assert "Gemini could not pick" in (result.reason or "")
 
 
 def test_fuzzy_spelling_still_finds_the_item(fixture_catalogue: Catalogue) -> None:
@@ -141,3 +144,10 @@ def test_generic_word_overlap_is_not_a_brand_match(real_catalogue: Catalogue) ->
 def test_bare_family_name_is_flagged_even_when_an_alias_matches(real_catalogue: Catalogue) -> None:
     line = real_catalogue.validate_line(ModelOrderLine(raw_text="calpol syp", sku_id="SKU0010", qty=6, confidence=0.95))
     assert line.status == "uncertain" and "share it" in (line.reason or "")
+
+
+def test_matched_lines_do_not_carry_the_could_not_pick_reason(fixture_catalogue: Catalogue) -> None:
+    for spoken in ("dolo sau pachas", "dolo 650", "electral"):
+        result = fixture_catalogue.validate_line(line(spoken, None, conf=0.95))
+        if result.status == "matched":
+            assert "could not pick" not in (result.reason or "")

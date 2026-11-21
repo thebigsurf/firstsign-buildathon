@@ -9,7 +9,7 @@ Baseline   For each (pin code, medicine group) and each day D, the baseline is t
            (median of the four same-weekday values / overall median, halfway to 1, clipped).
 Recent     The last 3 days are compared with their baselines: ratio = (recent + 0.5) / (baseline + 0.5).
 Chronic    BP and diabetes orders are the stable denominator. If a pin's chronic volume moved
-           (a scheme, a holiday), the group ratio is divided by that factor (clipped 0.75-1.4).
+           (a scheme, a holiday), the group ratio is divided by that factor (clipped 0.9-1.4).
 z          Robust z: excess daily units over sigma/sqrt(3), sigma = max(1.4826*MAD, sqrt(median), 1).
 Breadth    History stores how many chemists ordered a group per day (not who), so breadth is the share of
            the pin's not-yet-ordering chemists who are now ordering: (recent - normal) / (chemists - normal).

@@ -85,6 +85,25 @@ def test_parse_an_uploaded_sample_file_by_hash(client: TestClient) -> None:
     assert response.status_code == 200 and response.json()["model"] == "offline-sample"
 
 
+def test_offline_parse_rejects_unsupported_and_fake_media(client: TestClient) -> None:
+    pdf = client.post("/api/orders/parse", data={"chemist_id": "CH002"},
+                      files={"file": ("order.pdf", b"%PDF-1.4 fake", "application/pdf")})
+    assert pdf.status_code == 400
+    fake = client.post("/api/orders/parse", data={"chemist_id": "CH002"},
+                       files={"file": ("order.mp3", b"not really audio at all", "audio/mpeg")})
+    assert fake.status_code == 400 and fake.json()["error"]["code"] == "invalid_media"
+
+
+def test_security_headers_on_api_and_app(client: TestClient) -> None:
+    for path in ("/api/health", "/"):
+        h = client.get(path).headers
+        assert h["x-content-type-options"] == "nosniff" and h["x-frame-options"] == "DENY"
+        assert h["referrer-policy"] == "strict-origin-when-cross-origin"
+        assert h["strict-transport-security"] == "max-age=31536000"
+        csp = h["content-security-policy"]
+        assert "frame-ancestors 'none'" in csp and "tile.openstreetmap.org" in csp and "connect-src 'self'" in csp
+
+
 def test_signal_alerts_and_radar(client: TestClient) -> None:
     signal = client.get("/api/signal", params={"days": 30}).json()
     assert signal["as_of"] == "2026-11-19" and signal["simulated"] is True
@@ -110,6 +129,9 @@ def test_explain_approve_report_visits_and_metrics_loop(client: TestClient) -> N
         "alert_id": alert["alert_id"], "action": "officer_note", "approved_by": "Dr Mehta",
         "edited_text": "Edited note for the ward officer."})
     assert approved.status_code == 200 and approved.json()["edited"] is True
+    audit = [e for e in client.get("/api/audit").json()
+             if e["kind"] == "action_approved" and e["detail"]["action"] == "officer_note"]
+    assert audit and audit[-1]["detail"]["approved_text"] == "Edited note for the ward officer."
     client.post("/api/actions/approve", json={"alert_id": alert["alert_id"], "action": "asha_visit_list",
                                               "approved_by": "Dr Mehta"})
 

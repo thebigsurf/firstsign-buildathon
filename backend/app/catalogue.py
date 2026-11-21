@@ -132,6 +132,9 @@ class Candidate:
     exact: bool
 
 
+_SUGGESTED_REASON = "Gemini could not pick an item; the closest catalogue match is suggested."
+
+
 class Catalogue:
     """In-memory catalogue with fast fuzzy lookup."""
 
@@ -260,7 +263,7 @@ class Catalogue:
             untranslatable = bool(_DEVANAGARI_RE.search(spoken))  # no Latin spelling to compare with the aliases
             if top and top.score >= MIN_SUGGEST_UNNAMED and not untranslatable and self._names_a_brand(query, top):
                 chosen = top
-                reasons.append("Gemini could not pick an item; the closest catalogue match is suggested.")
+                reasons.append(_SUGGESTED_REASON)
 
         if chosen is None:
             alts = [] if _DEVANAGARI_RE.search(spoken) else self._alternatives(ranked, exclude=None)
@@ -287,6 +290,8 @@ class Catalogue:
             confidence = min(confidence, CONFIDENCE_THRESHOLD - 0.05)
         confidence = round(max(0.0, min(1.0, confidence)), 2)
         status = "matched" if confidence >= CONFIDENCE_THRESHOLD else "uncertain"
+        if status == "matched":  # the catalogue check resolved it confidently, so the "could not pick" note is moot
+            reasons = [r for r in reasons if r != _SUGGESTED_REASON]
         if status == "uncertain" and not reasons:
             reasons.append("Confidence is below 80%; please check this line.")
         return OrderLine(

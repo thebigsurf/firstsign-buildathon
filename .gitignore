@@ -23,3 +23,5 @@ docs/video/frames/
 
 frontend/public/demo.mp4
 docs/submission/template.pptx
+
+frontend/tsconfig.tsbuildinfo

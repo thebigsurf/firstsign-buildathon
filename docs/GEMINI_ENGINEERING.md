@@ -43,7 +43,7 @@ Findings, MEASURED:
 | Protection | What it does | Where |
 |---|---|---|
 | Concurrency cap | A process-wide semaphore (`GEMINI_MAX_CONCURRENCY`, default 4). A burst queues instead of hitting the quota; queue time is recorded per call. | `gemini.py` |
-| Per-IP rate limit | 20 requests per minute per client on order parse, chemist send, ASHA report and explain (`RATE_LIMIT_PER_MIN`). Over the limit: HTTP 429, a friendly message, `Retry-After`. Uses the last `X-Forwarded-For` entry, which Cloud Run appends and a client cannot spoof. | `ratelimit.py`, `api.py` |
+| Per-IP rate limit | 60 requests per minute per client on order parse, chemist send, ASHA report and explain (`RATE_LIMIT_PER_MIN`; the code default is 20, the deploy sets 60). Over the limit: HTTP 429, a friendly message, `Retry-After`. Uses the last `X-Forwarded-For` entry, which Cloud Run appends and a client cannot spoof. | `ratelimit.py`, `api.py` |
 | Retry with jitter | Retries 408/429/5xx, never 400/403 (matches Google's guidance). Honours the server's `Retry-After` header and RetryInfo, adds jitter, gives up on a model whose quota window is longer than 45 s and moves to the next model. A shared deadline caps the whole chain. | `gemini.py` |
 | Daily cost guard | `DAILY_GEMINI_BUDGET_INR` (default 300). Past it, no new Gemini call is made; saved answers still serve, and known samples return the labelled pre-recorded result. The ledger resets at midnight IST. | `usage.py`, `gemini.py` |
 | Request size | Upload read capped at 20 MB + 1 byte, whole request capped at 25 MB (413), text capped at 4,000 characters, file signature checked before any call is spent. | `api.py`, `main.py`, `parsing.py` |
