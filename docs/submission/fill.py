@@ -4,8 +4,8 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
-IMG = 'C:/Users/Utkarsh/AppData/Local/Temp/claude/290a82dd7a9201f5/35e5e6a6-0c42-4cd4-9f93-e7d6ea1f1819/scratchpad/deck/img2/'
-DOCS = 'C:/Users/Utkarsh/Desktop/firstsign/docs/'
+IMG = 'docs/deck_img/'  # screenshots used in the deck
+DOCS = 'docs/'
 INK = RGBColor(0x20, 0x21, 0x24); GREY = RGBColor(0x5F, 0x63, 0x68); BLUE = RGBColor(0x1A, 0x73, 0xE8)
 GREEN = RGBColor(0x18, 0x80, 0x38); AMBER = RGBColor(0xB0, 0x60, 0x00)
 LBLUE = RGBColor(0xE8, 0xF0, 0xFE); LGREEN = RGBColor(0xE6, 0xF4, 0xEA); LAMB = RGBColor(0xFE, 0xF7, 0xE0); LGREY = RGBColor(0xF1, 0xF3, 0xF4)
