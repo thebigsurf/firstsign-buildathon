@@ -1,5 +1,6 @@
 import { BadgeCheck, Check, CircleHelp, ClipboardCheck, EyeOff, FlaskConical, KeyRound, type LucideIcon } from "lucide-react";
 import { api } from "../api";
+import { AiUsagePanel } from "../components/AiUsagePanel";
 import { Badge } from "../components/ui/Badge";
 import { PulseLine } from "../components/ui/Pulse";
 import { ErrorPanel, Skeleton } from "../components/ui/States";
@@ -276,6 +277,8 @@ export function About() {
           </dl>
         )}
       </section>
+
+      <AiUsagePanel />
 
       <footer className="border-t border-border pt-6 text-sm text-muted">
         <p className="m-0">Built for the Google DeepMind x Google Cloud Startup Buildathon India 2026</p>

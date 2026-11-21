@@ -26,6 +26,7 @@ from .errors import AppError
 from .store import Store
 
 log = logging.getLogger("firstsign")
+MAX_REQUEST_BYTES = 25 * 1024 * 1024  # 20 MB of media plus form overhead
 
 
 class JsonFormatter(logging.Formatter):
@@ -79,6 +80,9 @@ def create_app(settings: Settings | None = None, store: Store | None = None) -> 
         rid = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
         request.state.request_id = rid
         started = time.perf_counter()
+        declared = request.headers.get("content-length", "")
+        if declared.isdigit() and int(declared) > MAX_REQUEST_BYTES and request.url.path.startswith("/api"):
+            return _error(413, "too_large", "That upload is too large (limit 25 MB).", request)
         response = await call_next(request)
         response.headers["X-Request-ID"] = rid
         if request.url.path.startswith("/api"):
@@ -88,7 +92,11 @@ def create_app(settings: Settings | None = None, store: Store | None = None) -> 
 
     @app.exception_handler(AppError)
     async def app_error(request: Request, exc: AppError) -> JSONResponse:
-        return _error(exc.status_code, exc.code, exc.message, request)
+        response = _error(exc.status_code, exc.code, exc.message, request)
+        retry_after = getattr(exc, "retry_after_s", None)
+        if retry_after:
+            response.headers["Retry-After"] = str(retry_after)
+        return response
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:

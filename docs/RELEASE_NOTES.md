@@ -12,6 +12,10 @@ All history, chemists, ASHA reports, official cases and lab data are SIMULATED a
 - Landing tiles from `/api/overview`: 4,795 orders, 18,470 lines, 120 chemists, 145 SKUs asked for and unavailable in 14 days, about 4.2 clerk minutes saved per order (an ESTIMATE, labelled).
 - New endpoints. Each returns 200 with an honest note if `data/extended` is missing: `/api/overview`, `/api/backtest`, `/api/environment`, `/api/stockouts`, `/api/asha/history`.
 
+## Gemini engineering (added 21 Nov, afternoon)
+
+- Usage ledger and `GET /api/ai/usage`; "AI usage and cost" panel on /about; spend guard, per-IP rate limit, concurrency cap, jittered retries, cache-friendly prompt layout, per-job thinking levels. Measured about INR 0.25 per order read. Details: `docs/GEMINI_ENGINEERING.md`.
+
 ## Checks run
 
 | Check | Result |

@@ -44,6 +44,12 @@ class Settings:
     gemini_max_attempts: int = 3
     gemini_deadline_s: float = 150.0  # total budget across the whole fallback chain for one request
     gemini_max_concurrency: int = 4
+    daily_budget_inr: float = 300.0  # daily Gemini spend guard: above this, labelled cached/offline results are served
+    usd_inr: float = 90.0  # assumed exchange rate for cost estimates (set USD_INR)
+    rate_limit_per_min: int = 20  # per client IP, across the upload/parse/report/explain endpoints
+    max_text_chars: int = 4000
+    image_resolution: str = "high"  # media_resolution for photos: low (280 tok) / medium (560) / high (1120) per the docs
+    bypass_cache: bool = False  # measurement only: skip the disk cache so every call is live
     parse_deadline_s: float = 25.0  # interactive parse: after this, fall back to the labelled sample and warm in background
     warm_deadline_s: float = 150.0  # background warm after a fallback may take as long as it needs
     google_cloud_project: str = "firstsign-buildathon"
@@ -79,4 +85,10 @@ class Settings:
             parse_deadline_s=float(os.getenv("PARSE_DEADLINE_S", "25")),
             warm_deadline_s=float(os.getenv("WARM_DEADLINE_S", "150")),
             cover_days=int(os.getenv("RADAR_COVER_DAYS", "5")),
+            gemini_max_concurrency=int(os.getenv("GEMINI_MAX_CONCURRENCY", "4")),
+            daily_budget_inr=float(os.getenv("DAILY_GEMINI_BUDGET_INR", "300")),
+            usd_inr=float(os.getenv("USD_INR", "90")),
+            rate_limit_per_min=int(os.getenv("RATE_LIMIT_PER_MIN", "20")),
+            image_resolution=os.getenv("GEMINI_IMAGE_RESOLUTION", "high").strip().lower(),
+            bypass_cache=_flag("GEMINI_BYPASS_CACHE"),
         )

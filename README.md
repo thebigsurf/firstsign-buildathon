@@ -88,6 +88,8 @@ flowchart LR
 
 Every model call has a fallback chain on 429/503, exponential backoff, a disk cache keyed by input hash, and an offline mode so the demo never dies. When a result comes from the pre-recorded fallback, the UI labels it `offline-sample`.
 
+**Gemini engineering.** Each call is metered (tokens by type, latency, cache hit, fallback, INR cost) in a usage ledger, served at `GET /api/ai/usage` and shown on the About page. The order prompt puts the catalogue first so Gemini's implicit cache applies (about 68% of prompt tokens measured at the cached rate); thinking is `minimal` for parsing and `medium` for the agent; a concurrency cap, a per-IP rate limit, jittered retries and a daily spend guard (`DAILY_GEMINI_BUDGET_INR`, default 300) protect quota and money. Measured cost is about INR 0.25 per order read. See [docs/GEMINI_ENGINEERING.md](docs/GEMINI_ENGINEERING.md); reproduce with `python -m app.measure --orders --asha --explain 2` (spends real money).
+
 ## Run locally
 
 Requirements: Python 3.11, Node 20+ (Node 24 tested). Put your key in `.env` (copy `.env.example`):

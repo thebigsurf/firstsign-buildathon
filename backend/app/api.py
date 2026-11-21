@@ -6,12 +6,13 @@ import mimetypes
 import os
 from typing import Any
 
-from fastapi import APIRouter, File, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
 from . import __version__
 from .context import AppContext
-from .errors import AppError, NotFound
+from .errors import AppError, BadRequest, NotFound
+from .ratelimit import client_ip
 from .models import (
     ActionApproved,
     ActionApproveRequest,
@@ -30,7 +31,7 @@ from .models import (
     SignalResponse,
     Telemetry,
 )
-from .parsing import Upload
+from .parsing import MAX_MEDIA_BYTES, Upload
 from .store import LocalStore
 
 router = APIRouter(prefix="/api")
@@ -43,7 +44,15 @@ def ctx(request: Request) -> AppContext:
 def _upload(file: UploadFile | None) -> Upload | None:
     if file is None or not file.filename:
         return None
-    return Upload(data=file.file.read(), filename=file.filename, content_type=file.content_type)
+    data = file.file.read(MAX_MEDIA_BYTES + 1)  # never buffer more than the limit plus one byte
+    if len(data) > MAX_MEDIA_BYTES:
+        raise BadRequest("The file is larger than 20 MB. Please send a shorter note.", code="too_large")
+    return Upload(data=data, filename=file.filename, content_type=file.content_type)
+
+
+def throttle(request: Request) -> None:
+    """Dependency for endpoints that can spend Gemini money: a per-IP sliding window (429 with Retry-After)."""
+    ctx(request).limiter.check(client_ip(request))
 
 
 # ------------------------------------------------------------------ reference
@@ -124,7 +133,7 @@ def media(request: Request, message_id: str) -> FileResponse:
     return _media_response(request, message_id)
 
 
-@router.post("/chemist/send")
+@router.post("/chemist/send", dependencies=[Depends(throttle)])
 def chemist_send(
     request: Request,
     chemist_id: str = Form(...),
@@ -135,7 +144,7 @@ def chemist_send(
     return ctx(request).services.send_from_chemist(chemist_id, _upload(file), text)
 
 
-@router.post("/orders/parse", response_model=ParsedOrder)
+@router.post("/orders/parse", response_model=ParsedOrder, dependencies=[Depends(throttle)])
 def orders_parse(
     request: Request,
     file: UploadFile | None = File(default=None),
@@ -160,6 +169,19 @@ def orders_list(request: Request, limit: int = Query(default=50, ge=1, le=500)) 
 def telemetry(request: Request) -> dict[str, Any]:
     """Gemini usage: calls, models, fallbacks, latency, grounded sources, cache hits."""
     return ctx(request).gemini.telemetry()
+
+
+@router.get("/ai/usage")
+def ai_usage(request: Request) -> dict[str, Any]:
+    """Every Gemini call, summed: tokens by type, cost in INR, per-job averages, cache and fallback rates, latency."""
+    c = ctx(request)
+    summary = c.gemini.ledger.summary()
+    summary["limits"] = {"rate_limit_per_min_per_ip": c.settings.rate_limit_per_min,
+                         "gemini_max_concurrency": c.settings.gemini_max_concurrency,
+                         "max_upload_mb": MAX_MEDIA_BYTES // (1024 * 1024), "max_text_chars": c.settings.max_text_chars,
+                         "image_resolution": c.settings.image_resolution, "offline": c.gemini.offline,
+                         "model_fast": list(c.settings.model_fast), "model_reason": list(c.settings.model_reason)}
+    return summary
 
 
 @router.get("/audit", response_model=list[AuditEntry])
@@ -234,7 +256,7 @@ def asha_history(request: Request, pin: str | None = Query(default=None, min_len
 # ---------------------------------------------------------------------- agent
 
 
-@router.post("/agent/explain", response_model=Explanation)
+@router.post("/agent/explain", response_model=Explanation, dependencies=[Depends(throttle)])
 def agent_explain(request: Request, body: ExplainRequest) -> Explanation:
     return ctx(request).agent.explain(body.alert_id, body.refresh)
 
@@ -252,7 +274,7 @@ def asha_visits(request: Request, asha_id: str = Query(min_length=1)) -> list[di
     return ctx(request).services.asha_visits(asha_id)
 
 
-@router.post("/asha/report", response_model=AshaReportResult)
+@router.post("/asha/report", response_model=AshaReportResult, dependencies=[Depends(throttle)])
 def asha_report(
     request: Request,
     asha_id: str = Form(...),

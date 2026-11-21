@@ -55,6 +55,10 @@ firstsign/
   - `GEMINI_MODEL_REASON`: default `gemini-4-hydrogen`, then `gemini-3.5-flash`. Used for the agent.
   - **Always use structured output** (response JSON schema) for parsing.
   - **Retries:** exponential backoff, max 3.
+- **Gemini engineering (21 Nov 2026).** Full detail and measured numbers in `docs/GEMINI_ENGINEERING.md`.
+  - Every call goes through `GeminiClient` and is written to the usage ledger (`app/usage.py`: tokens by type, latency, cache hit, fallback, error code, INR cost). `GET /api/ai/usage` summarises it.
+  - Parse prompt layout: instructions + compact catalogue in the system instruction (identical every call, so implicit caching can match it), the variable text or media after it. Thinking level per job: `minimal` for parsing, `low` for search, `medium` for the agent. Photos at `media_resolution=high`. `max_output_tokens` per job.
+  - Protection: concurrency semaphore (`GEMINI_MAX_CONCURRENCY`), per-IP rate limit on parse/send/report/explain (`RATE_LIMIT_PER_MIN`, 429 + `Retry-After`, `app/ratelimit.py`), jittered retry honouring `Retry-After`, daily spend guard (`DAILY_GEMINI_BUDGET_INR`, default 300) that falls back to labelled saved results, 20 MB upload and 4,000-character text caps.
 - **Mock mode.** If `GEMINI_API_KEY` is missing or `DEMO_OFFLINE=1`, parsing returns deterministic canned results from `data/samples/*.expected.json` so the demo never dies.
 - **Data rules:**
   - No patient names stored.
@@ -141,6 +145,8 @@ ParsedOrder { message_id|null, chemist_id, language, transcript, lines: [OrderLi
 | GET | `/api/media/{message_id}` | The audio or image of any inbox message (bundled or sent through the app), for replay. 404 for a text message |
 
 **Confidence rule (simple, explainable):** `confidence = signal strength (ratio and z, capped) x breadth factor (share of chemists in that pin ordering above normal) x co-movement bonus`, then updated by ASHA reports. Reports with symptom counts above an expected background rate raise it; reports with near-zero counts lower it. Show the reasons in plain words.
+
+**AI usage:** `GET /api/ai/usage` returns `{totals, by_job, by_model, cache{disk_hit_rate, implicit_cached_token_share}, fallback_rate, error_rate, latency_ms{p50,p95}, cost_per_order_inr, budget{daily_inr, spent_today_inr, remaining_inr, exceeded}, assumptions{usd_inr, prices_usd_per_1m}, limits}`. The four Gemini endpoints (`/orders/parse`, `/chemist/send`, `/asha/report`, `/agent/explain`) can answer 429 `rate_limited` with a `Retry-After` header.
 
 ## 6. Frontend (Vite + React + TS + Tailwind)
 

@@ -55,7 +55,7 @@ def test_live_order_parse_sends_audio_inline_and_validates_against_catalogue(fix
     assert parsed.not_available == ["electral"] and parsed.model == "stub-model" and parsed.latency_ms == 321
     prompt, system, media = gemini.prompts[0]
     assert media[0].mime_type == "audio/ogg" and media[0].data == b"OggS-bytes"
-    assert "S1|Dolo 650" in prompt and "never invent" in system.lower()
+    assert "S1|Dolo 650" in system and "never invent" in system.lower()  # catalogue leads, in the cacheable system part
 
 
 def test_text_order_goes_in_the_prompt(fixture_ctx: AppContext) -> None:

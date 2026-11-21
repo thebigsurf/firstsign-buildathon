@@ -20,3 +20,6 @@ backend/.state/
 docs/video/raw/
 docs/video/build/
 docs/video/frames/
+
+frontend/public/demo.mp4
+docs/submission/template.pptx

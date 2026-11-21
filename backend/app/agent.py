@@ -82,11 +82,15 @@ class ExplainAgent:
         prompt = self._reason_prompt(alert, context, findings, bool(sources))
         try:
             result = self.gemini.generate_structured(
-                self.gemini.settings.model_reason, prompt, ModelExplain, system=REASON_SYSTEM, temperature=0.2
+                self.gemini.settings.model_reason, prompt, ModelExplain, system=REASON_SYSTEM, temperature=0.2,
+                thinking="medium", job="explain_reason", max_output_tokens=8192,
             )
             raw = ModelExplain.model_validate(result.json())
         except (UpstreamError, ValueError) as exc:
             log.warning("reasoning call failed (%s); using data-only explanation", type(exc).__name__)
+            ledger = getattr(self.gemini, "ledger", None)
+            if ledger is not None:
+                ledger.record(job="explain_reason", model="labelled-sample", fallback=True, error_code="fell_back")
             last = self._last_good(alert.alert_id)
             if last is not None:
                 return last.model_copy(update={
@@ -142,7 +146,8 @@ class ExplainAgent:
             "Give short dated findings, each with the source name. If there is nothing relevant, say so."
         )
         try:
-            result = self.gemini.generate_grounded(self.gemini.settings.model_reason, prompt, system=SEARCH_SYSTEM)
+            result = self.gemini.generate_grounded(self.gemini.settings.model_reason, prompt, system=SEARCH_SYSTEM,
+                                                    thinking="low", job="explain_grounded")
         except UpstreamError as exc:
             log.warning("grounded search failed: %s", exc.message[:120])
             return "No search findings are available.", [], 0, "No external sources found: the web search step failed.", []

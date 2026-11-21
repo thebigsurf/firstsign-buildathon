@@ -172,10 +172,21 @@ class Catalogue:
         return self.skus.get(sku_id) if sku_id else None
 
     def prompt_table(self) -> str:
-        """Compact catalogue for the Gemini prompt: one pipe-separated row per SKU."""
+        """Compact catalogue for the Gemini prompt: one pipe-separated row per SKU.
+
+        Token-lean: aliases that only repeat the brand (or brand + strength) are dropped, since the model already
+        sees those. The table is identical on every call, which is what lets implicit caching reuse it.
+        """
         lines = ["sku_id|brand|strength|form|aliases"]
         for s in self.skus.values():
-            lines.append(f"{s.sku_id}|{s.brand}|{s.strength}|{s.form}|{';'.join(s.aliases)}")
+            known = {normalise(s.brand), normalise(f"{s.brand} {s.strength}"),
+                     normalise(f"{s.brand} {s.strength}".replace(" mg", "mg"))}
+            kept: list[str] = []
+            for alias in s.aliases:
+                key = normalise(alias)
+                if key not in known and key not in {normalise(k) for k in kept}:
+                    kept.append(alias)
+            lines.append(f"{s.sku_id}|{s.brand}|{s.strength}|{s.form}|{';'.join(kept)}")
         return "\n".join(lines)
 
     # ---------------------------------------------------------------- matching

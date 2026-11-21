@@ -182,7 +182,7 @@ def test_quota_error_with_long_retry_info_skips_the_model_and_short_one_waits(tm
 
     monkeypatch.setattr(GeminiClient, "_once", fake_once)
     assert client.generate_structured(("long", "short"), "p", ModelOrderOut).model == "short"
-    assert calls == ["long", "short", "short"] and sleeps == [2.0]
+    assert calls == ["long", "short", "short"] and len(sleeps) == 1 and 2.0 <= sleeps[0] <= 2.75  # Retry-After plus jitter
 
 
 def test_grounding_quota_error_fails_fast_and_pauses_search(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -215,4 +215,4 @@ def test_a_model_that_rejects_the_thinking_setting_is_retried_with_its_default(t
 
     monkeypatch.setattr(GeminiClient, "_once", fake_once)
     assert client.generate_structured(("m",), "p", ModelOrderOut, fast=True).model == "m"
-    assert seen == [True, False]
+    assert seen == ["minimal", None]

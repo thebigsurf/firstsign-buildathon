@@ -2,6 +2,7 @@ import type {
   Locality,
   ActionApproved,
   ActionName,
+  AiUsage,
   Alert,
   Asha,
   AshaDay,
@@ -143,6 +144,7 @@ export interface ReportInput {
 export const api = {
   health: (signal?: AbortSignal) => get<Health>("/health", signal),
   telemetry: (signal?: AbortSignal) => get<Telemetry>("/telemetry", signal),
+  aiUsage: (signal?: AbortSignal) => get<AiUsage>("/ai/usage", signal),
   catalogue: (signal?: AbortSignal) => get<CatalogueItem[]>("/catalogue", signal),
   groups: (signal?: AbortSignal) => get<Group[]>("/groups", signal),
   pincodes: (signal?: AbortSignal) => get<Pincode[]>("/pincodes", signal),

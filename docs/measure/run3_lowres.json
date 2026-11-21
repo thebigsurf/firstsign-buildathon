@@ -1,0 +1,208 @@
+{
+ "rows": [
+  {
+   "id": "658b7ca609dc",
+   "ts": "2026-11-21T07:53:01+05:30",
+   "day": "2026-11-21",
+   "job": "parse_image",
+   "model": "gemini-3.5-flash",
+   "requested_model": "gemini-3.5-flash",
+   "prompt_tokens": 7946,
+   "output_tokens": 755,
+   "thought_tokens": 0,
+   "cached_tokens": 5881,
+   "audio_tokens": 0,
+   "total_tokens": 8701,
+   "latency_ms": 7508,
+   "queue_ms": 0,
+   "attempt": 1,
+   "disk_cache_hit": false,
+   "fallback": false,
+   "error_code": null,
+   "grounded": false,
+   "sources": 0,
+   "cost_usd": 0.002683,
+   "cost_inr": 0.2415,
+   "price_listed": false
+  },
+  {
+   "id": "157a68a176dc",
+   "ts": "2026-11-21T07:53:07+05:30",
+   "day": "2026-11-21",
+   "job": "parse_image",
+   "model": "gemini-3.5-flash",
+   "requested_model": "gemini-3.5-flash",
+   "prompt_tokens": 7946,
+   "output_tokens": 841,
+   "thought_tokens": 0,
+   "cached_tokens": 6089,
+   "audio_tokens": 0,
+   "total_tokens": 8787,
+   "latency_ms": 5349,
+   "queue_ms": 0,
+   "attempt": 1,
+   "disk_cache_hit": false,
+   "fallback": false,
+   "error_code": null,
+   "grounded": false,
+   "sources": 0,
+   "cost_usd": 0.002842,
+   "cost_inr": 0.2558,
+   "price_listed": false
+  },
+  {
+   "id": "3363788bafd3",
+   "ts": "2026-11-21T07:53:12+05:30",
+   "day": "2026-11-21",
+   "job": "parse_image",
+   "model": "gemini-3.5-flash",
+   "requested_model": "gemini-3.5-flash",
+   "prompt_tokens": 7946,
+   "output_tokens": 837,
+   "thought_tokens": 0,
+   "cached_tokens": 6095,
+   "audio_tokens": 0,
+   "total_tokens": 8783,
+   "latency_ms": 5245,
+   "queue_ms": 0,
+   "attempt": 1,
+   "disk_cache_hit": false,
+   "fallback": false,
+   "error_code": null,
+   "grounded": false,
+   "sources": 0,
+   "cost_usd": 0.002831,
+   "cost_inr": 0.2548,
+   "price_listed": false
+  }
+ ],
+ "summary": {
+  "totals": {
+   "calls": 3,
+   "prompt_tokens": 23838,
+   "output_tokens": 2433,
+   "thought_tokens": 0,
+   "cached_tokens": 18065,
+   "audio_tokens": 0,
+   "total_tokens": 26271,
+   "cost_inr": 0.7521,
+   "avg_prompt_tokens": 7946,
+   "avg_output_tokens": 811,
+   "avg_thought_tokens": 0,
+   "avg_total_tokens": 8757,
+   "avg_cost_inr": 0.2507,
+   "avg_latency_ms": 6034,
+   "p50_latency_ms": 5349,
+   "p95_latency_ms": 7508,
+   "errors": 0,
+   "disk_cache_hits": 0,
+   "labelled_fallbacks": 0,
+   "requests_seen": 3
+  },
+  "by_job": {
+   "parse_image": {
+    "calls": 3,
+    "prompt_tokens": 23838,
+    "output_tokens": 2433,
+    "thought_tokens": 0,
+    "cached_tokens": 18065,
+    "audio_tokens": 0,
+    "total_tokens": 26271,
+    "cost_inr": 0.7521,
+    "avg_prompt_tokens": 7946,
+    "avg_output_tokens": 811,
+    "avg_thought_tokens": 0,
+    "avg_total_tokens": 8757,
+    "avg_cost_inr": 0.2507,
+    "avg_latency_ms": 6034,
+    "p50_latency_ms": 5349,
+    "p95_latency_ms": 7508
+   }
+  },
+  "by_model": {
+   "gemini-3.5-flash": {
+    "calls": 3,
+    "prompt_tokens": 23838,
+    "output_tokens": 2433,
+    "thought_tokens": 0,
+    "cached_tokens": 18065,
+    "audio_tokens": 0,
+    "total_tokens": 26271,
+    "cost_inr": 0.7521,
+    "avg_prompt_tokens": 7946,
+    "avg_output_tokens": 811,
+    "avg_thought_tokens": 0,
+    "avg_total_tokens": 8757,
+    "avg_cost_inr": 0.2507,
+    "avg_latency_ms": 6034,
+    "p50_latency_ms": 5349,
+    "p95_latency_ms": 7508
+   }
+  },
+  "cache": {
+   "disk_hit_rate": 0.0,
+   "implicit_cached_token_share": 0.758
+  },
+  "fallback_rate": 0.0,
+  "error_rate": 0.0,
+  "latency_ms": {
+   "p50": 5349,
+   "p95": 7508
+  },
+  "cost_per_order_inr": 0.2507,
+  "budget": {
+   "daily_inr": 0,
+   "spent_today_inr": 0.7521,
+   "remaining_inr": 0.0,
+   "exceeded": false
+  },
+  "assumptions": {
+   "usd_inr": 90.0,
+   "currency": "INR",
+   "prices_usd_per_1m": {
+    "gemini-3.8-flash": {
+     "input": 0.75,
+     "audio_input": 0.75,
+     "output_incl_thinking": 3.75,
+     "cached_input": 0.075,
+     "listed_on_pricing_page": true,
+     "basis": "list price through 31 Dec 2026 (doubles from 1 Jan 2027)"
+    },
+    "gemini-3.1-flash-lite": {
+     "input": 0.25,
+     "audio_input": 0.5,
+     "output_incl_thinking": 1.5,
+     "cached_input": 0.025,
+     "listed_on_pricing_page": true,
+     "basis": "list price"
+    },
+    "gemini-3.5-flash-lite": {
+     "input": 0.3,
+     "audio_input": 0.3,
+     "output_incl_thinking": 2.5,
+     "cached_input": 0.03,
+     "listed_on_pricing_page": true,
+     "basis": "list price"
+    },
+    "gemini-4-hydrogen": {
+     "input": 1.5,
+     "audio_input": 1.5,
+     "output_incl_thinking": 7.5,
+     "cached_input": 0.075,
+     "listed_on_pricing_page": true,
+     "basis": "list price"
+    },
+    "gemini-3.5-flash": {
+     "input": 0.3,
+     "audio_input": 0.3,
+     "output_incl_thinking": 2.5,
+     "cached_input": 0.03,
+     "listed_on_pricing_page": false,
+     "basis": "not listed; priced as gemini-3.5-flash-lite"
+    }
+   },
+   "grounding_usd_per_request_after_free_5000_month": 0.014
+  },
+  "since": "2026-11-21T07:53:01+05:30"
+ }
+}

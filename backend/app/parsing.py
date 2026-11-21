@@ -150,16 +150,31 @@ def prepare_audio(data: bytes, mime: str) -> tuple[bytes, str]:
         return data, mime
 
 
+def _note_fallback(gemini: GeminiClient, job: str) -> None:
+    """Count a labelled pre-recorded answer in the usage ledger (it cost nothing, but it is a fallback)."""
+    ledger = getattr(gemini, "ledger", None)
+    if ledger is not None:
+        ledger.record(job=job, model="labelled-sample", fallback=True, error_code="fell_back")
+
+
+def _check_text(gemini: GeminiClient, text: str | None) -> None:
+    limit = getattr(gemini.settings, "max_text_chars", 4000)
+    if text and len(text) > limit:
+        raise BadRequest(f"That message is longer than {limit} characters. Please send a shorter one.", code="too_long")
+
+
 # ------------------------------------------------------------------ order parsing
 
 
 def _order_prompt(catalogue: Catalogue, chemist: dict[str, Any], kind: str, text: str | None) -> str:
     language = {"hi": "Hindi", "mr": "Marathi", "en": "English"}.get(chemist.get("language", ""), "Hindi")
     source = f"Message text from the chemist:\n{text}" if text else f"The attached file is a {kind}."
-    return (
-        f"The chemist usually writes or speaks {language}.\n{source}\n\n"
-        f"CATALOGUE (sku_id|brand|strength|form|aliases):\n{catalogue.prompt_table()}"
-    )
+    return f"The chemist usually writes or speaks {language}.\n{source}"
+
+
+def _order_system(catalogue: Catalogue) -> str:
+    """Instructions + catalogue: identical on every order call, so it leads the request and can be cached implicitly."""
+    return f"{ORDER_SYSTEM}\nCATALOGUE (sku_id|brand|strength|form|aliases):\n{catalogue.prompt_table()}"
 
 
 _UNITS = r"(strips?|boxe?s?|bottles?|sachets?|tubes?|vials?|patta|pattay|dabba|dibba|botal|bottle)"
@@ -338,9 +353,10 @@ def _read_live(gemini: GeminiClient, catalogue: Catalogue, chemist: dict[str, An
         media.append(Media(data=data, mime_type=mime, filename=upload.filename))
         kind = "voice note" if mime.startswith("audio/") else "photo of a handwritten order list"
     prompt = _order_prompt(catalogue, chemist, kind, text.strip() if text else None)
+    job = "parse_text" if not media else "parse_audio" if media[0].mime_type.startswith("audio/") else "parse_image"
     result = gemini.generate_structured(
-        gemini.settings.model_fast, prompt, ModelOrderOut, media=media, system=ORDER_SYSTEM, fast=True,
-        deadline_s=deadline_s,
+        gemini.settings.model_fast, prompt, ModelOrderOut, media=media, system=_order_system(catalogue),
+        thinking="minimal", job=job, max_output_tokens=8192, deadline_s=deadline_s,
     )
     try:
         return ModelOrderOut.model_validate(result.json()), result
@@ -378,6 +394,15 @@ def warm_in_background(gemini: GeminiClient, catalogue: Catalogue, chemist: dict
     return True
 
 
+_AUDIO_SUFFIXES = {".mp3", ".wav", ".ogg", ".oga", ".opus", ".m4a", ".aac", ".flac", ".webm"}
+
+
+def _order_job(upload: Upload | None, text: str | None) -> str:
+    if upload is None:
+        return "parse_text"
+    return "parse_audio" if Path(upload.filename or "").suffix.lower() in _AUDIO_SUFFIXES else "parse_image"
+
+
 def parse_order(
     gemini: GeminiClient,
     catalogue: Catalogue,
@@ -395,6 +420,7 @@ def parse_order(
     """
     if not upload and not (text and text.strip()):
         raise BadRequest("Send an audio file, a photo, or some text to parse.")
+    _check_text(gemini, text)
     started = time.perf_counter()
     cached = False
     canned_lines: list[OrderLine] | None = None
@@ -423,6 +449,7 @@ def parse_order(
             if upload is not None or text:
                 warm_in_background(gemini, catalogue, chemist, upload, text)
             out, model_name, latency = coerce_order_output(canned), "offline-sample", 0
+            _note_fallback(gemini, _order_job(upload, text))
             canned_lines = _expected_lines(catalogue, canned)
             out = out.model_copy(update={"notes": f"{UNAVAILABLE_NOTE} {out.notes}".strip()})
 
@@ -504,6 +531,7 @@ def parse_asha_report(
     """
     if not upload and not (text and text.strip()):
         raise BadRequest("Record or upload a voice note, or type the report.")
+    _check_text(gemini, text)
     started = time.perf_counter()
     canned = gemini.offline_samples.lookup(upload.filename, upload.data) if upload else None
     if gemini.offline:
@@ -525,11 +553,13 @@ def parse_asha_report(
     )
     try:
         result = gemini.generate_structured(
-            gemini.settings.model_fast, prompt, AshaStructured, media=media, system=ASHA_SYSTEM, fast=True
+            gemini.settings.model_fast, prompt, AshaStructured, media=media, system=ASHA_SYSTEM, thinking="minimal",
+            job="asha_report", max_output_tokens=4096,
         )
     except UpstreamError:
         if canned is None:
             raise
+        _note_fallback(gemini, "asha_report")
         report = AshaStructured.model_validate(canned)
         return ParsedAsha(report.model_copy(update={"notes": f"{UNAVAILABLE_NOTE} {report.notes}".strip()}),
                           "offline-sample", 0)

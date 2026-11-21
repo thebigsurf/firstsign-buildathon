@@ -460,3 +460,46 @@ export interface ChemistSendResult {
   message_id: string;
   status: string;
 }
+
+// ---------------------------------------------------------------- AI usage ledger (GET /api/ai/usage)
+
+export interface AiUsageBucket {
+  calls: number;
+  prompt_tokens: number;
+  output_tokens: number;
+  thought_tokens: number;
+  cached_tokens: number;
+  audio_tokens: number;
+  total_tokens: number;
+  cost_inr: number;
+  avg_prompt_tokens: number;
+  avg_output_tokens: number;
+  avg_thought_tokens: number;
+  avg_total_tokens: number;
+  avg_cost_inr: number;
+  avg_latency_ms: number;
+  p50_latency_ms: number;
+  p95_latency_ms: number;
+}
+
+export interface AiUsage {
+  totals: AiUsageBucket & { errors: number; disk_cache_hits: number; labelled_fallbacks: number; requests_seen: number };
+  by_job: Record<string, AiUsageBucket>;
+  by_model: Record<string, AiUsageBucket>;
+  cache: { disk_hit_rate: number; implicit_cached_token_share: number };
+  fallback_rate: number;
+  error_rate: number;
+  latency_ms: { p50: number; p95: number };
+  cost_per_order_inr: number;
+  budget: { daily_inr: number; spent_today_inr: number; remaining_inr: number; exceeded: boolean };
+  assumptions: { usd_inr: number; currency: string };
+  limits: {
+    rate_limit_per_min_per_ip: number;
+    gemini_max_concurrency: number;
+    max_upload_mb: number;
+    max_text_chars: number;
+    image_resolution: string;
+    offline: boolean;
+  };
+  since: string | null;
+}

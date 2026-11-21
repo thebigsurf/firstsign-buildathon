@@ -27,6 +27,7 @@ from pydantic import BaseModel
 
 from .config import Settings
 from .errors import BadRequest, UpstreamError
+from .usage import UsageLedger, token_usage
 
 log = logging.getLogger("firstsign.gemini")
 
@@ -34,7 +35,8 @@ RETRYABLE_CODES = {408, 429, 500, 502, 503, 504}
 SEARCH_BLOCK_S = 300.0  # after a grounding quota error, skip search for this long instead of waiting on futile retries
 MAX_QUOTA_WAIT_S = 45.0  # longest Retry-After we will sit through on a 429
 MODEL_COOLDOWN_S = 600.0  # a model that is out of daily quota or missing is skipped for this long
-SKIP_MODEL_CODES = {400, 403, 404}  # this model cannot serve the request: try the next one
+SKIP_MODEL_CODES = {400, 403, 404}
+THINKING_LEVELS = ("minimal", "low", "medium", "high")  # this model cannot serve the request: try the next one
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,9 @@ class GeminiResult:
     cached: bool = False
     sources: list[dict[str, str]] = field(default_factory=list)
     search_queries: list[str] = field(default_factory=list)
+    tokens: dict[str, int] = field(default_factory=dict)
+    queue_ms: int = 0
+    attempt: int = 1
 
     def json(self) -> dict[str, Any]:
         return parse_json_text(self.text)
@@ -124,11 +129,16 @@ class SampleIndex:
         return json.loads(target.read_text(encoding="utf-8"))
 
 
+class BudgetExceeded(UpstreamError):
+    """The daily Gemini spend guard is closed: callers fall back to labelled cached or offline results."""
+
+
 class GeminiClient:
     """Thin, resilient wrapper over google-genai."""
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, ledger: UsageLedger | None = None) -> None:
         self.settings = settings
+        self.ledger = ledger or UsageLedger(None, usd_inr=settings.usd_inr, budget_inr=settings.daily_budget_inr)
         self.offline_samples = SampleIndex(settings.data_dir / "samples")
         self._client: Any = None
         self._client_lock = threading.Lock()
@@ -231,14 +241,19 @@ class GeminiClient:
         temperature: float = 0.0,
         use_cache: bool = True,
         fast: bool = False,
+        thinking: str | None = None,
+        job: str = "unknown",
+        max_output_tokens: int | None = None,
         deadline_s: float | None = None,
     ) -> GeminiResult:
-        """Call Gemini with a response schema and return JSON text. `fast=True` turns thinking down for parsing.
+        """Call Gemini with a response schema and return JSON text.
 
-        `deadline_s` caps the whole fallback chain for this request (and each HTTP call within it).
+        `thinking` is "minimal", "low", "medium" or "high" (`fast=True` means "minimal"): low for extraction, higher
+        for reasoning. `job` labels the call in the usage ledger. `deadline_s` caps the whole fallback chain.
         """
-        return self._run(models, prompt, system, media, temperature, use_cache, schema=schema, search=False, fast=fast,
-                         deadline_s=deadline_s)
+        return self._run(models, prompt, system, media, temperature, use_cache, schema=schema, search=False,
+                         thinking=thinking or ("minimal" if fast else None), job=job,
+                         max_output_tokens=max_output_tokens, deadline_s=deadline_s)
 
     def generate_grounded(
         self,
@@ -248,9 +263,12 @@ class GeminiClient:
         system: str = "",
         temperature: float = 0.2,
         use_cache: bool = True,
+        thinking: str | None = None,
+        job: str = "explain_grounded",
     ) -> GeminiResult:
         """Call Gemini with the Google Search tool; sources come from grounding metadata."""
-        return self._run(models, prompt, system, (), temperature, use_cache, schema=None, search=True, fast=False)
+        return self._run(models, prompt, system, (), temperature, use_cache, schema=None, search=True,
+                         thinking=thinking, job=job)
 
     def _run(
         self,
@@ -263,20 +281,24 @@ class GeminiClient:
         *,
         schema: type[BaseModel] | None,
         search: bool,
-        fast: bool,
+        thinking: str | None,
+        job: str = "unknown",
+        max_output_tokens: int | None = None,
         deadline_s: float | None = None,
     ) -> GeminiResult:
         if self.offline:
             raise UpstreamError("Gemini is in offline demo mode: no live call was made.")
         if search and time.monotonic() < self._search_blocked_until:
             raise UpstreamError("Google Search grounding is over its quota right now; skipped.")
-        mode = ("search" if search else "json") + ("-fast" if fast else "")
+        mode = ("search" if search else "json") + (f"-{thinking}" if thinking else "")
         schema_name = schema.__name__ if schema else ""
         key = self.cache_key(models[0], mode, prompt, system, schema_name, media)
-        if use_cache:
+        if use_cache and not self.settings.bypass_cache:
             hit = self._cache_read(key)
             if hit:
                 self._record(cache_hit=True)
+                self.ledger.record(job=job, model=hit["model"], requested_model=models[0], disk_cache_hit=True,
+                                   latency_ms=0, grounded=search, sources=len(hit.get("sources", [])))
                 return GeminiResult(
                     text=hit["text"],
                     model=hit["model"],
@@ -286,6 +308,10 @@ class GeminiClient:
                     search_queries=hit.get("search_queries", []),
                 )
 
+        if self.ledger.over_budget():
+            self.ledger.record(job=job, model=models[0], requested_model=models[0], error_code="budget")
+            raise BudgetExceeded("The daily AI budget is used up, so no new Gemini call was made. Showing the "
+                                 "labelled saved result instead.")
         failures: list[str] = []
         deadline = time.monotonic() + (deadline_s if deadline_s is not None else self.settings.gemini_deadline_s)
         for model in models:
@@ -295,9 +321,12 @@ class GeminiClient:
             if time.monotonic() < self._model_blocked_until.get(model, 0.0) and model != models[-1]:
                 failures.append(f"{model} skipped (cooling down)")
                 continue
-            result = self._call_with_retries(model, prompt, system, media, temperature, schema, search, fast, failures,
-                                             deadline)
+            result = self._call_with_retries(model, prompt, system, media, temperature, schema, search, thinking,
+                                             failures, deadline, job, models[0], max_output_tokens)
             if result is not None:
+                self.ledger.record(job=job, model=result.model, requested_model=models[0], tokens=result.tokens,
+                                   latency_ms=result.latency_ms, queue_ms=result.queue_ms, attempt=result.attempt,
+                                   fallback=result.model != models[0], grounded=search, sources=len(result.sources))
                 self._record(result=result, first_model=models[0])
                 self._cache_write(
                     key,
@@ -328,9 +357,12 @@ class GeminiClient:
         temperature: float,
         schema: type[BaseModel] | None,
         search: bool,
-        fast: bool,
+        thinking: str | None,
         failures: list[str],
         deadline: float,
+        job: str = "unknown",
+        first_model: str = "",
+        max_output_tokens: int | None = None,
     ) -> GeminiResult | None:
         from google.genai import errors
 
@@ -338,22 +370,31 @@ class GeminiClient:
         for attempt in range(1, attempts + 1):
             if time.monotonic() > deadline:
                 return None
-            started = time.perf_counter()
+            queued = time.perf_counter()
+            queue_ms = 0
             try:
-                with self._slots:
-                    text, sources, queries = self._once(model, prompt, system, media, temperature, schema, search, fast,
-                                                        timeout_s=deadline - time.monotonic())
+                with self._slots:  # per-process concurrency cap: a burst waits here instead of hitting the quota
+                    started = time.perf_counter()
+                    queue_ms = int((started - queued) * 1000)
+                    out = self._once(model, prompt, system, media, temperature, schema, search, thinking,
+                                     timeout_s=deadline - time.monotonic(), max_output_tokens=max_output_tokens)
+                    text, sources, queries = out[0], out[1], out[2]
+                    tokens = out[3] if len(out) > 3 else {}
                 latency = int((time.perf_counter() - started) * 1000)
                 if not text.strip():
                     raise ValueError("empty response")
-                log.info("gemini ok model=%s attempt=%d latency_ms=%d search=%s", model, attempt, latency, search)
-                return GeminiResult(text=text, model=model, latency_ms=latency, sources=sources, search_queries=queries)
+                log.info("gemini ok job=%s model=%s attempt=%d latency_ms=%d tokens=%s", job, model, attempt, latency,
+                         tokens.get("total_tokens"))
+                return GeminiResult(text=text, model=model, latency_ms=latency, sources=sources, search_queries=queries,
+                                    tokens=tokens, queue_ms=queue_ms, attempt=attempt)
             except errors.APIError as exc:
                 code = int(getattr(exc, "code", 0) or 0)
                 failures.append(f"{model} HTTP {code}")
+                self.ledger.record(job=job, model=model, requested_model=first_model, attempt=attempt,
+                                   queue_ms=queue_ms, error_code=str(code or "api"), grounded=search)
                 log.warning("gemini error model=%s attempt=%d code=%s", model, attempt, code)
-                if code == 400 and fast and "hinking" in str(exc):
-                    fast = False  # this model rejects our thinking setting: retry it with its default
+                if code == 400 and thinking and "hinking" in str(exc):
+                    thinking = None  # this model rejects our thinking setting: retry it with its default
                     continue
                 if code == 404:
                     self._model_blocked_until[model] = time.monotonic() + MODEL_COOLDOWN_S
@@ -368,12 +409,15 @@ class GeminiClient:
                             self._model_blocked_until[model] = time.monotonic() + MODEL_COOLDOWN_S
                         return None  # quota window is long: the next model in the chain is the better bet
                     if attempt < attempts:
+                        wait += random.uniform(0, 0.25 * wait + 0.25)  # jitter so parallel clients do not re-collide
                         if time.monotonic() + wait > deadline:
                             return None  # waiting would blow this request's budget
                         time.sleep(wait)
                         continue
             except Exception as exc:  # timeouts, connection resets, empty bodies
                 failures.append(f"{model} {type(exc).__name__}")
+                self.ledger.record(job=job, model=model, requested_model=first_model, attempt=attempt,
+                                   queue_ms=queue_ms, error_code=type(exc).__name__, grounded=search)
                 log.warning("gemini failure model=%s attempt=%d type=%s", model, attempt, type(exc).__name__)
                 if "Timeout" in type(exc).__name__:
                     return None  # a model that is this slow will not recover on retry: try the next one
@@ -393,13 +437,15 @@ class GeminiClient:
         temperature: float,
         schema: type[BaseModel] | None,
         search: bool,
-        fast: bool,
+        thinking: str | None,
         timeout_s: float | None = None,
-    ) -> tuple[str, list[dict[str, str]], list[str]]:
+        max_output_tokens: int | None = None,
+    ) -> tuple[str, list[dict[str, str]], list[str], dict[str, int]]:
         from google.genai import types
 
-        parts: list[Any] = [types.Part.from_bytes(data=m.data, mime_type=m.mime_type) for m in media]
-        parts.append(prompt)
+        # Stable text first, then the variable media (the shared prefix is what implicit caching keys on).
+        parts: list[Any] = [prompt]
+        parts.extend(types.Part.from_bytes(data=m.data, mime_type=m.mime_type) for m in media)
         config_args: dict[str, Any] = {"temperature": temperature}
         if system:
             config_args["system_instruction"] = system
@@ -408,10 +454,16 @@ class GeminiClient:
             config_args["response_schema"] = schema
         if search:
             config_args["tools"] = [types.Tool(google_search=types.GoogleSearch())]
-        if fast:
-            thinking = fast_thinking_config(model)
-            if thinking is not None:
-                config_args["thinking_config"] = thinking
+        if thinking:
+            config = thinking_config(model, thinking)
+            if config is not None:
+                config_args["thinking_config"] = config
+        if max_output_tokens:
+            config_args["max_output_tokens"] = max_output_tokens
+        resolution = self.settings.image_resolution
+        if resolution and any(m.mime_type.startswith("image/") for m in media):
+            config_args["media_resolution"] = getattr(types.MediaResolution, f"MEDIA_RESOLUTION_{resolution.upper()}",
+                                                      types.MediaResolution.MEDIA_RESOLUTION_UNSPECIFIED)
         if timeout_s is not None:
             # Never wait longer than the request's remaining budget (and never longer than the client default).
             budget = max(1.0, min(timeout_s, self.settings.gemini_timeout_s))
@@ -420,11 +472,18 @@ class GeminiClient:
             model=model, contents=parts, config=types.GenerateContentConfig(**config_args)
         )
         sources, queries = extract_grounding(response) if search else ([], [])
-        return response.text or "", sources, queries
+        return response.text or "", sources, queries, token_usage(response)
 
 
 def retry_delay_s(exc: Exception) -> float | None:
     """Seconds Gemini asks us to wait (RetryInfo in a 429), or None if it did not say."""
+    headers = getattr(getattr(exc, "response", None), "headers", None)
+    try:
+        header = headers.get("retry-after") if headers is not None else None
+        if header is not None:
+            return min(float(header), 3600.0)  # standard Retry-After in seconds
+    except (TypeError, ValueError, AttributeError):
+        pass
     details = getattr(exc, "details", None)
     items = details.get("error", {}).get("details", []) if isinstance(details, dict) else []
     for item in items:
@@ -437,16 +496,21 @@ def retry_delay_s(exc: Exception) -> float | None:
     return None
 
 
-def fast_thinking_config(model: str) -> Any:
-    """Minimal thinking for extraction work (transcribe and structure), where reasoning adds latency, not accuracy."""
+def thinking_config(model: str, level: str) -> Any:
+    """Thinking level per model family, clamped to what the official docs list for it.
+
+    Extraction (transcribe and structure) runs at "minimal"; the reasoning agent at "medium". Gemini 3.8 and 4 have no
+    "minimal", so it becomes "low" there. 2.5-era models use a token budget instead of a level.
+    """
     from google.genai import types
 
-    if model.startswith("gemini-3.5"):
-        return types.ThinkingConfig(thinking_level="MINIMAL")
-    if model.startswith("gemini-3"):
-        return types.ThinkingConfig(thinking_level="LOW")
+    level = level if level in THINKING_LEVELS else "low"
     if model.startswith("gemini-2.5-flash"):
-        return types.ThinkingConfig(thinking_budget=0)
+        return types.ThinkingConfig(thinking_budget={"minimal": 0, "low": 512, "medium": 2048, "high": 8192}[level])
+    if model.startswith(("gemini-4", "gemini-3.8")) and level == "minimal":
+        level = "low"
+    if model.startswith(("gemini-4", "gemini-3")):
+        return types.ThinkingConfig(thinking_level=level.upper())
     return None
 
 

@@ -28,7 +28,7 @@ from .errors import AppError
 log = logging.getLogger("firstsign.store")
 
 COLLECTIONS = ("orders", "parses", "audit", "asha_reports", "explanations", "approvals", "parse_log", "messages",
-               "stockouts")
+               "stockouts", "ai_usage")
 
 
 def utc_now() -> str:
@@ -203,6 +203,13 @@ class Store(ABC):
 
     def _bump(self) -> None:
         self._version += 1
+
+    # Gemini usage ledger (does not invalidate the signal) -----------------------
+    def add_ai_usage(self, row: dict[str, Any]) -> None:
+        self._append("ai_usage", row)
+
+    def list_ai_usage(self) -> list[dict[str, Any]]:
+        return self._list("ai_usage")
 
     # orders ----------------------------------------------------------------
     def add_order(self, order: dict[str, Any]) -> None:
