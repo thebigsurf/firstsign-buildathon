@@ -25,7 +25,9 @@ Clusters   Alerting pins of the same group within 3 km of each other form one al
            watch-only pins (two or more) form a watch.
 Confidence signal strength (ratio and z, capped) x breadth factor x co-movement bonus, then moved by
            ASHA reports in log-odds space: counts above the background rate raise it, near-zero counts lower it.
-Status     confirmed : confidence >= 0.70 and at least two ASHA reports above the background rate (CONFIRM_REPORTS = 2)
+Status     confirmed : confidence >= 0.70, and at least two reports above the background rate from two DIFFERENT
+                       ASHAs, with at least 25 households visited across those reports (one worker, however many
+                       visits, never confirms an alert)
            dismissed : two or more ASHA reports near zero and none above background
            open      : otherwise
 """
@@ -115,11 +117,14 @@ FIRST_LINE_MOLECULES: dict[str, tuple[str, ...]] = {
 }
 RADAR_WEIGHTS = (0.4, 0.3, 0.2, 0.1)  # share of the suggested group stock given to each ranked SKU
 # Alert status rule (shown in the UI):
-#   confirmed  when confidence >= CONFIRM_AT and at least two ASHA reports are above the background rate
+#   confirmed  when confidence >= CONFIRM_AT and at least CONFIRM_REPORTS reports above the background rate come
+#              from at least CONFIRM_ASHAS different ASHAs who visited at least CONFIRM_HOUSEHOLDS households in all
 #   dismissed  when at least DISMISS_REPORTS reports are near zero and none is above background
 #   open       otherwise
 CONFIRM_AT = 0.70
 CONFIRM_REPORTS = 2   # one visit can raise confidence but never confirms an alert alone
+CONFIRM_ASHAS = 2     # ... and the raising reports must come from different ASHAs
+CONFIRM_HOUSEHOLDS = 25  # ... covering at least this many households between them
 DISMISS_REPORTS = 2
 MAX_REPORT_DELTA = 1.0  # cap on the log-odds one report can add (about +0.2 to +0.4 in probability)
 
@@ -368,18 +373,27 @@ def report_delta(group: str, report: dict[str, Any]) -> float:
 
 
 def apply_reports(base: float, group: str, reports: list[dict[str, Any]]) -> tuple[float, str, list[float]]:
-    """Fold reports into a base confidence. Returns (confidence, status, per-report deltas)."""
+    """Fold reports into a base confidence. Returns (confidence, status, per-report deltas).
+
+    Confirmed needs confidence >= CONFIRM_AT plus at least CONFIRM_REPORTS raised reports from at least
+    CONFIRM_ASHAS different ASHAs (by `asha_id`) covering at least CONFIRM_HOUSEHOLDS households. Near-zero
+    reports still lower confidence.
+    """
     logit, deltas = _logit(base), []
     for rep in reports:
         d = report_delta(group, rep)
         deltas.append(d)
         logit += d
     conf = min(max(_sigmoid(logit), 0.05), 0.98)
-    raised_count = sum(1 for d in deltas if d > 0.2)
+    raised_reps = [r for r, d in zip(reports, deltas, strict=True) if d > 0.2]
+    raised_count = len(raised_reps)
     raised = raised_count > 0
     near_zero = sum(1 for d in deltas if d < -0.2)
+    ashas = {r.get("asha_id") for r in raised_reps if r.get("asha_id")}
+    households = sum(int(r.get("households_visited", 0)) for r in raised_reps)
     status = "open"
-    if raised_count >= CONFIRM_REPORTS and conf >= CONFIRM_AT:
+    if (raised_count >= CONFIRM_REPORTS and len(ashas) >= CONFIRM_ASHAS
+            and households >= CONFIRM_HOUSEHOLDS and conf >= CONFIRM_AT):
         status = "confirmed"
     elif near_zero >= DISMISS_REPORTS and not raised:
         status = "dismissed"
@@ -571,6 +585,18 @@ class SignalService:
                 created_at=rep.get("created_at", ""), effect=effect,  # type: ignore[arg-type]
                 relevant_cases=cases, households_visited=int(rep.get("households_visited", 0)),
             ))
+        raised_reps = [r for r, d in zip(mine, deltas, strict=True) if d > 0.2]
+        n_ashas = len({r.get("asha_id") for r in raised_reps if r.get("asha_id")})
+        hh = sum(int(r.get("households_visited", 0)) for r in raised_reps)
+        if status == "confirmed":
+            reasons.append(f"Confirmed on the ground: {len(raised_reps)} reports above normal from {n_ashas} different ASHAs, "
+                           f"{hh} households visited.")
+        elif status == "open":
+            reasons.append(
+                f"Not confirmed yet: it takes {CONFIRM_REPORTS} reports above normal from {CONFIRM_ASHAS} different ASHAs, "
+                f"covering at least {CONFIRM_HOUSEHOLDS} households. So far {len(raised_reps)} report"
+                f"{'s' if len(raised_reps) != 1 else ''} above normal from {n_ashas} ASHA{'s' if n_ashas != 1 else ''}, "
+                f"{hh} households.")
         reasons.insert(0, f"Confidence {round(conf * 100)}%: {'before ASHA reports ' + str(round(base * 100)) + '%' if mine else 'from order data only, awaiting ASHA verification'}.")
 
         return Alert(

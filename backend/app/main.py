@@ -161,7 +161,7 @@ def _mount_frontend(app: FastAPI, dist: Path) -> None:
     if (dist / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
 
-    @app.get("/{full_path:path}", include_in_schema=False)
+    @app.api_route("/{full_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
     def spa(full_path: str) -> FileResponse:
         if full_path == "api" or full_path.startswith("api/"):
             raise StarletteHTTPException(404, "No such API route.")

@@ -99,8 +99,8 @@ def test_confidence_formula_is_monotone() -> None:
     assert base_confidence(1.0, 0.0, 0.0, 1, 0) < 0.1
 
 
-def report(cases: int, households: int = 40, **kw) -> dict:
-    return {"diarrhoea": cases, "households_visited": households, **kw}
+def report(cases: int, households: int = 40, asha_id: str = "ASHA01", **kw) -> dict:
+    return {"diarrhoea": cases, "households_visited": households, "asha_id": asha_id, **kw}
 
 
 def test_report_above_background_raises_and_near_zero_lowers() -> None:
@@ -113,7 +113,7 @@ def test_report_above_background_raises_and_near_zero_lowers() -> None:
 def test_status_rule_confirm_and_dismiss() -> None:
     conf, status, deltas = apply_reports(0.6, "diarrhoea", [report(8, water_issue_reported=True)])
     assert status == "open" and max(deltas) <= 1.0          # one visit alone never confirms
-    conf, status, _ = apply_reports(0.6, "diarrhoea", [report(8, water_issue_reported=True), report(6)])
+    conf, status, _ = apply_reports(0.6, "diarrhoea", [report(8, water_issue_reported=True), report(6, asha_id="ASHA02")])
     assert conf >= CONFIRM_AT and status == "confirmed"
     conf, status, _ = apply_reports(0.6, "diarrhoea", [report(0)])
     assert status == "open" and conf < 0.6                 # one near-zero report only lowers
@@ -161,3 +161,18 @@ def test_radar_lists_alert_areas_first_line_stock_first_and_scales_with_demand(f
     assert [s.sku_id for s in item.skus] == ["S4", "S5"]                  # oral rehydration salts, both first line
     assert item.skus[0].suggested_qty > item.skus[1].suggested_qty >= 1      # 40/30 weighting
     assert "days of cover" in item.skus[0].reason
+
+
+def test_confirmation_needs_two_different_ashas_and_enough_households() -> None:
+    same = [report(8, water_issue_reported=True), report(6)]                 # same ASHA twice
+    conf, status, _ = apply_reports(0.6, "diarrhoea", same)
+    assert conf >= CONFIRM_AT and status == "open"
+    few = [report(4, households=12, water_issue_reported=True), report(4, households=12, asha_id="ASHA02", water_issue_reported=True)]
+    conf, status, deltas = apply_reports(0.6, "diarrhoea", few)             # 24 households only
+    assert min(deltas) > 0.2 and status == "open"
+    ok = [report(4, households=15, water_issue_reported=True), report(4, households=15, asha_id="ASHA02", water_issue_reported=True)]
+    assert apply_reports(0.6, "diarrhoea", ok)[1] == "confirmed"            # 30 households, over the 25 bar
+    # a near-zero report from a second ASHA still lowers confidence and does not count towards confirming
+    mixed = [report(8, water_issue_reported=True), report(0, asha_id="ASHA02")]
+    conf_m, status_m, _ = apply_reports(0.6, "diarrhoea", mixed)
+    assert status_m == "open" and conf_m < apply_reports(0.6, "diarrhoea", mixed[:1])[0]

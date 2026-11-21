@@ -1,4 +1,4 @@
-import { CheckCircle2, List, ListOrdered, Map as MapIcon } from "lucide-react";
+import { CheckCircle2, Info, List, ListOrdered, Map as MapIcon, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import { AlertCard } from "../components/officer/AlertCard";
@@ -9,6 +9,16 @@ import { cx, fmtDate, LEVEL_RANK } from "../lib/format";
 import { toApiError, useAsync, useDocumentTitle, useMediaQuery, usePolling } from "../lib/hooks";
 import { useRefData } from "../lib/refdata";
 import type { Alert, AlertStatus, AshaVisit } from "../types";
+
+const HINT_KEY = "firstsign.confirmHintDismissed";
+
+function hintDismissed(): boolean {
+  try {
+    return window.sessionStorage.getItem(HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 type StatusFilter = AlertStatus | "all";
 
@@ -129,6 +139,16 @@ export function Officer() {
 
   const openCount = (alerts.data ?? []).filter((a) => a.status === "open").length;
   const confirmedCount = (alerts.data ?? []).filter((a) => a.status === "confirmed").length;
+  const [hintGone, setHintGone] = useState(hintDismissed);
+  const showHint = !hintGone && alerts.data !== undefined && confirmedCount === 0;
+  const dismissHint = (): void => {
+    setHintGone(true);
+    try {
+      window.sessionStorage.setItem(HINT_KEY, "1");
+    } catch {
+      /* the hint just comes back next visit */
+    }
+  };
   const showMap = lg || view === "map";
   const showList = lg || view === "list";
 
@@ -142,6 +162,15 @@ export function Officer() {
   return (
     <div className="mx-auto max-w-[1440px] space-y-4 px-4 py-4 md:px-6 xl:px-8">
       <h1 className="sr-only">Map and alerts</h1>
+      {showHint && (
+        <p role="note" className="m-0 flex items-start gap-2 rounded-lg border border-border bg-sunken px-3 py-1 text-sm">
+          <Info size={16} aria-hidden="true" className="mt-3 shrink-0 text-muted" />
+          <span className="flex-1 py-2">Two ASHA voice reports from different ASHAs confirm an alert. Try it as sunita@asha.demo.</span>
+          <button type="button" onClick={dismissHint} aria-label="Dismiss this hint" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
+            <X size={16} aria-hidden="true" />
+          </button>
+        </p>
+      )}
       <dl aria-label="Summary" className="m-0 grid grid-cols-2 gap-3 md:grid-cols-4">
         {kpis.map(([label, value]) => (
           <div key={label} className="rounded-lg border border-border bg-surface px-3 py-2">
@@ -160,7 +189,7 @@ export function Officer() {
               role="radio"
               aria-checked={view === id}
               onClick={() => setView(id)}
-              className={cx("inline-flex min-h-9 items-center gap-1.5 rounded-md px-4 text-sm font-medium", view === id ? "bg-surface shadow-1" : "text-muted")}
+              className={cx("inline-flex min-h-11 items-center gap-1.5 rounded-md px-4 text-sm font-medium", view === id ? "bg-surface shadow-1" : "text-muted")}
             >
               <Icon size={16} aria-hidden="true" /> {label}
             </button>
@@ -207,7 +236,7 @@ export function Officer() {
                       aria-checked={filter === id}
                       onClick={() => setFilter(id)}
                       className={cx(
-                        "min-h-9 rounded-full px-3 text-sm font-medium",
+                        "min-h-11 rounded-full px-3 text-sm font-medium",
                         filter === id ? "bg-accent text-accentFg" : "border border-borderStrong bg-surface hover:bg-sunken",
                       )}
                     >

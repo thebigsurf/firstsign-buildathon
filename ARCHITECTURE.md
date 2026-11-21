@@ -12,7 +12,7 @@ Because every order passes through, FirstSign also sees which medicine groups (f
 2. **Health officer view:** a ranked list of where ASHA workers should visit next.
 3. **ASHA view:** each ASHA records her visit observations as a voice note in her own language.
 
-Her report moves the alert: one report raises or lowers its confidence, and **two independent reports are needed to confirm** it (a near-zero report lowers it). Each report becomes labelled ground truth.
+Her report moves the alert: one report raises or lowers its confidence, and **an alert is confirmed only by at least two reports above normal from two different ASHAs, covering at least 25 households between them** (several visits by one ASHA never confirm it) (a near-zero report lowers it). Each report becomes labelled ground truth.
 
 **Gemini's jobs:** reading voice, reading handwriting, matching to the catalogue, structuring ASHA reports, and running an agent that explains why an area is rising (using Google Search) and drafts the actions. A human approves every outbound action.
 

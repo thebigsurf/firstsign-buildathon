@@ -333,7 +333,15 @@ export function AlertDetail() {
                             {i + 1}. {c.cause}
                           </p>
                           <p className="m-0 text-sm">{c.evidence}</p>
-                          <ConfidenceMeter value={c.confidence} label={`Confidence in: ${c.cause}`} width="w-24" />
+                          <p className="m-0 text-xs font-semibold text-muted">
+                            {shownExplanation.sources.length === 0
+                              ? "Hypothesis, no outside source"
+                              : "Hypothesis, not tied to a source (searched context below is not proof)"}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-x-2">
+                            <ConfidenceMeter value={c.confidence} label={`Rough estimate of confidence in: ${c.cause}`} width="w-24" />
+                            <span className="text-xs text-muted">rough estimate</span>
+                          </div>
                         </li>
                       ))}
                     </ol>
@@ -365,8 +373,8 @@ export function AlertDetail() {
                   </div>
 
                   <div>
-                    <h3 className="text-h3">Google Search context for this area</h3>
-                    <p className="m-0 mt-1 text-sm text-muted">Live web results for the area and dates. They are context, not proof of this alert; the demo order history is simulated.</p>
+                    <h3 className="text-h3">Searched context for this area (Google Search)</h3>
+                    <p className="m-0 mt-1 text-sm text-muted">Web results the search returned for the area and dates (searched context). They are not proof of this alert; the demo order history is simulated.</p>
                     {shownExplanation.sources.length === 0 ? (
                       <p className="m-0 mt-1 text-sm">
                         No outside sources found. The explanation uses our order data only.

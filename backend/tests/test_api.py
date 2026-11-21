@@ -150,6 +150,16 @@ def test_explain_approve_report_visits_and_metrics_loop(client: TestClient) -> N
     assert body["diarrhoea"] == 8 and body["alert_id"] == alert["alert_id"] and body["new_confidence"] > before
     refreshed = client.get(f"/api/alerts/{alert['alert_id']}").json()
     assert refreshed["asha_reports"] == 1 and refreshed["status"] == "open"   # one visit never confirms alone
+    # the same ASHA visiting a second locality still cannot confirm; a different ASHA can
+    same_pin = [loc for loc in client.get("/api/localities").json() if loc["pin"] == locality["pin"]]
+    others = [a for a in client.get("/api/asha").json() if a["pin"] == locality["pin"] and a["asha_id"] != asha["asha_id"]]
+    assert others, "demo pin needs two ASHAs"
+    second = client.post("/api/asha/report", data={
+        "asha_id": others[0]["asha_id"], "locality_id": same_pin[0]["locality_id"],
+        "text": "visited 35 households, 7 diarrhoea cases, 4 children affected, dirty water"})
+    assert second.status_code == 200, second.text
+    confirmed = client.get(f"/api/alerts/{alert['alert_id']}").json()
+    assert confirmed["asha_reports"] == 2 and confirmed["status"] == "confirmed"
 
     payload = {"asha_id": asha["asha_id"], "locality_id": visit["locality_id"],
                "text": "visited 30 households, 8 diarrhoea cases, 5 children affected, dirty water"}
@@ -159,7 +169,7 @@ def test_explain_approve_report_visits_and_metrics_loop(client: TestClient) -> N
     assert wrong.status_code == 422
 
     metrics = client.get("/api/metrics").json()
-    assert metrics["asha_reports"] == 1 and metrics["decoys_suppressed"] >= 1 and metrics["alerts_raised"] >= 1
+    assert metrics["asha_reports"] == 2 and metrics["decoys_suppressed"] >= 1 and metrics["alerts_raised"] >= 1
     assert metrics["days_first_sign_to_action"] is not None
     kinds = {a["kind"] for a in client.get("/api/audit").json()}
     assert {"action_approved", "asha_report"} <= kinds
@@ -195,6 +205,7 @@ def test_frontend_is_served_with_spa_fallback_when_built(tmp_path: Path) -> None
     (dist / "assets").mkdir(parents=True)
     (dist / "index.html").write_text("<html>app</html>", encoding="utf-8")
     (dist / "assets" / "a.js").write_text("console.log(1)", encoding="utf-8")
+    (dist / "demo.mp4").write_bytes(b"0123456789")
     settings = make_settings(tmp_path, REAL_DATA, frontend_dist=dist)
     with TestClient(create_app(settings, LocalStore())) as c:
         assert c.get("/").text == "<html>app</html>"
@@ -202,6 +213,11 @@ def test_frontend_is_served_with_spa_fallback_when_built(tmp_path: Path) -> None
         assert c.get("/assets/a.js").text == "console.log(1)"
         assert c.get("/api/health").json()["status"] == "ok"
         assert c.get("/api/unknown").status_code == 404
+        for path in ("/", "/demo.mp4", "/officer", "/assets/a.js"):    # HEAD must work wherever GET does
+            head = c.head(path)
+            assert head.status_code == 200 and head.content == b"", path
+        assert c.head("/demo.mp4").headers["content-length"] == "10"
+        assert c.head("/api/unknown").status_code == 404
         assert c.get("/%2e%2e/%2e%2e/secret").text == "<html>app</html>"  # no path traversal out of dist
 
 

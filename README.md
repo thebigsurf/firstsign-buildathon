@@ -30,7 +30,7 @@ Because every order passes through, FirstSign also sees which medicine groups ar
 
 1. **Stock radar (distributor):** "stock up on these, and here is why".
 2. **Health officer view:** a ranked list of where ASHA workers should visit next, built from a live signal instead of past case data.
-3. **ASHA view:** the ASHA records her visit observations as a voice note in her own language. Gemini structures it. One report moves the alert's confidence; **two independent reports confirm it**; a near-zero report lowers it. Each becomes labelled ground truth.
+3. **ASHA view:** the ASHA records her visit observations as a voice note in her own language. Gemini structures it. One report moves the alert's confidence; **two reports above normal from two different ASHAs (at least 25 households visited between them) confirm it**; a near-zero report lowers it. Each becomes labelled ground truth.
 
 A Gemini agent explains why an area is rising (using Google Search grounding) and drafts the actions. **A human approves every outbound action**, the screen always shows what the AI is unsure of, nothing is silently corrected, and every approval is written to an audit log.
 

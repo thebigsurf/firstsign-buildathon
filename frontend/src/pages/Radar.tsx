@@ -9,7 +9,7 @@ import { Sparkline } from "../components/ui/Sparkline";
 import { useToast } from "../components/ui/Toast";
 import { cx, fmtDate, LEVEL_RANK, plural, ratioText } from "../lib/format";
 import { coverText } from "../lib/extended";
-import { toApiError, useAsync, useDocumentTitle } from "../lib/hooks";
+import { toApiError, useAsync, useDocumentTitle, useMediaQuery } from "../lib/hooks";
 import { useRefData } from "../lib/refdata";
 import type { Cell, Level, RadarItem, Stockout } from "../types";
 
@@ -26,7 +26,17 @@ function sortItems(items: RadarItem[], sort: Sort): RadarItem[] {
   return copy.sort((a, b) => LEVEL_RANK[levelOf(b)] - LEVEL_RANK[levelOf(a)] || b.ratio - a.ratio);
 }
 
-function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: Cell | undefined }) {
+interface CardProps {
+  item: RadarItem;
+  rank: number;
+  cell: Cell | undefined;
+  /** Phone layout: the card can fold away its chart and stock list. */
+  collapsible: boolean;
+  open: boolean;
+  onToggle: () => void;
+}
+
+function RadarCard({ item, rank, cell, collapsible, open, onToggle }: CardProps) {
   const { groupById, catalogue } = useRefData();
   const toast = useToast();
   const [all, setAll] = useState(false);
@@ -79,6 +89,20 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
         <p className="m-0 text-sm text-muted">{plural(item.chemists_affected, "chemist")} ordering above normal</p>
       </div>
 
+      {collapsible && (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-controls={`radar-body-${item.pin}-${item.group}`}
+          className="inline-flex min-h-11 w-full items-center justify-between gap-2 rounded-lg bg-sunken px-3 text-sm font-semibold"
+        >
+          {open ? "Hide chart and stock" : "Show chart and stock"}
+          <ChevronDown size={16} aria-hidden="true" className={cx(open && "rotate-180")} />
+        </button>
+      )}
+
+      <div id={`radar-body-${item.pin}-${item.group}`} hidden={collapsible && !open} className="flex flex-col gap-4">
       {cell ? <Sparkline series={cell.series} level={level} label={label} /> : <p className="m-0 text-sm text-muted">No chart for this area yet.</p>}
 
       <div>
@@ -88,7 +112,7 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
         ) : (
           <ul className="m-0 list-none space-y-2 p-0">
             {skus.map((s) => (
-              <li key={s.sku_id} className="flex items-start gap-3">
+              <li key={s.sku_id} className="flex items-center gap-1">
                 <input
                   type="checkbox"
                   id={`pick-${item.pin}-${item.group}-${s.sku_id}`}
@@ -101,9 +125,9 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
                       return next;
                     })
                   }
-                  className="mt-1 h-5 w-5 accent-[var(--accent)]"
+                  className="h-11 w-11 shrink-0 accent-[var(--accent)]"
                 />
-                <label htmlFor={`pick-${item.pin}-${item.group}-${s.sku_id}`} className="min-w-0 flex-1">
+                <label htmlFor={`pick-${item.pin}-${item.group}-${s.sku_id}`} className="min-w-0 flex-1 py-1">
                   <span className="flex items-baseline justify-between gap-2">
                     <span className="font-semibold">{s.brand}</span>
                     <span className="mono shrink-0 text-sm">
@@ -123,10 +147,12 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
           </ul>
         )}
         {item.skus.length > 3 && (
-          <Button variant="ghost" size="sm" className="mt-2" onClick={() => setAll((v) => !v)} aria-expanded={all} icon={<ChevronDown size={14} aria-hidden="true" className={cx(all && "rotate-180")} />}>
+          <Button variant="ghost" size="md" className="mt-2" onClick={() => setAll((v) => !v)} aria-expanded={all} icon={<ChevronDown size={14} aria-hidden="true" className={cx(all && "rotate-180")} />}>
             {all ? "Show fewer" : `Show all ${item.skus.length}`}
           </Button>
         )}
+      </div>
+
       </div>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
@@ -137,7 +163,7 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
         ) : (
           <span className="text-sm text-muted">No alert for this area.</span>
         )}
-        <Button variant="secondary" size="sm" icon={<ClipboardCopy size={14} aria-hidden="true" />} onClick={() => void copy()} disabled={item.skus.length === 0}>
+        <Button variant="secondary" size="md" icon={<ClipboardCopy size={14} aria-hidden="true" />} onClick={() => void copy()} disabled={item.skus.length === 0}>
           Copy reorder list
         </Button>
       </footer>
@@ -208,6 +234,8 @@ export function Radar() {
   const stockouts = stockQ.data ?? [];
   const [sort, setSort] = useState<Sort>("urgency");
   const [filter, setFilter] = useState<Set<string>>(new Set());
+  const phone = useMediaQuery("(max-width: 639px)");
+  const [openKey, setOpenKey] = useState<string | null>(null);
 
   const cells = useMemo(() => new Map((signal.data?.cells ?? []).map((c) => [`${c.pin}|${c.group}`, c])), [signal.data]);
   const items = useMemo(() => {
@@ -256,7 +284,7 @@ export function Radar() {
                 aria-pressed={filter.has(g.id)}
                 onClick={() => toggle(g.id)}
                 className={cx(
-                  "min-h-9 rounded-full px-3 text-sm font-medium",
+                  "min-h-11 rounded-full px-3 text-sm font-medium",
                   filter.has(g.id) ? "bg-accent text-accentFg" : "border border-borderStrong bg-surface hover:bg-sunken",
                 )}
               >
@@ -294,13 +322,19 @@ export function Radar() {
         />
       ) : (
         <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item, i) => (
-            <li key={`${item.pin}-${item.group}`} className="flex">
+          {items.map((item, i) => {
+            const key = `${item.pin}-${item.group}`;
+            // On phones one card is open at a time; the first is open until another is chosen.
+            const open = !phone || (openKey ?? `${items[0]?.pin}-${items[0]?.group}`) === key;
+            return (
+            <li key={key} className="flex">
               <div className="w-full">
-                <RadarCard item={item} rank={i + 1} cell={cells.get(`${item.pin}|${item.group}`)} />
+                <RadarCard item={item} rank={i + 1} cell={cells.get(`${item.pin}|${item.group}`)}
+                  collapsible={phone} open={open} onToggle={() => setOpenKey(open ? "" : key)} />
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 
