@@ -181,7 +181,7 @@ rows = [['Item', 'Estimate', 'Basis'],
         ['Public-health pilot', '₹25 lakh–2 Cr per district', 'grant or CSR funded; our estimate'],
         ['Dischargely (live revenue)', '₹10–15 lakh setup + ~₹2 lakh/month per hospital', 'our live hospital contract; funds the FirstSign pilot']]
 table(s, 0.35, 1.35, 9.3, rows, [2.4, 3.4, 3.5], size=11)
-tb(s, 0.35, 4.6, 9.3, 0.7, [[('b', 'Year 3 (est.): '), ('', '10 hospitals on Dischargely ≈ ₹2.4 Cr recurring + ~₹1.25 Cr setup; 250 distributors on FirstSign ≈ ₹1.35 Cr; ≈ ₹5 Cr combined before any grant.')]], size=12)
+tb(s, 0.35, 4.45, 9.3, 0.9, [[('b', 'Year 3 (est.), split: '), ('', 'FirstSign alone: 250 distributors × ₹3,750 mid-price × 12 ≈ ₹1.1 Cr a year. Dischargely: 10 hospitals × ₹2 lakh × 12 ≈ ₹2.4 Cr a year, plus ~₹1.25 Cr one-time setup. FirstSign is the business we are building; Dischargely funds it.')]], size=11)
 
 # slide 10: snapshots
 s = S[10]
@@ -194,7 +194,7 @@ for k, (pth, cap) in enumerate(shots):
 # slide 11: performance
 s = S[11]
 rows = [['Measure', 'Result', 'How measured'],
-        ['Order lines read right', '55 of 56 (98%)', '10 sample orders: 4 voice, 3 photo, 3 text; gemini-3.1-flash-lite'],
+        ['Order lines read right (smoke test)', '55 of 56', '10 team-made sample orders: 4 voice, 3 photo, 3 text; gemini-3.1-flash-lite'],
         ['Wrong lines shown as certain', '0', 'same run; doubt goes yellow instead'],
         ['Parse latency', '4.6 s median, 7.2 s p95', '20 live calls on gemini-3.5-flash'],
         ['ASHA report fields right', '35 of 36', '4 voice reports: Hindi ×3, Marathi ×1'],
@@ -202,7 +202,7 @@ rows = [['Measure', 'Result', 'How measured'],
         ['Signal back-test', 'both seeded events alert; decoy suppressed', 'simulated history, labelled as such'],
         ['AI cost', '₹0.25 per order, ₹0.05 per ASHA report', 'usage ledger; ~68% of prompt tokens cached']]
 table(s, 0.35, 1.35, 9.3, rows, [2.4, 2.6, 4.3], size=10.5)
-tb(s, 0.35, 4.75, 9.3, 0.5, [[('g', 'Small sample made for the test; the pilot measures accuracy on real orders (clerk edit rate) and alert precision against ASHA findings.')]], size=10)
+tb(s, 0.35, 4.7, 9.3, 0.6, [[('g', 'A smoke test, not a benchmark: a clerk approves every line, so no AI output reaches a bill unapproved. The pilot measures accuracy on real orders (clerk edit rate) and alert precision against ASHA findings.')]], size=10)
 
 # slide 12: future
 s = S[12]
@@ -216,13 +216,13 @@ s = S[13]
 tb(s, 0.28, 0.73, 9.0, 0.6, [[('', 'Business model and go-to-market')]], size=24)
 rows = [['Who', 'Gets', 'Pays'], ['Distributor (buyer)', 'Order desk that frees part of a clerk; stock radar', '₹3,000–4,500 / month per desk (est.)'], ['Chemist', 'Orders billed right, faster; no new app', 'Free'], ['Health office / CSR', 'Ranked ASHA visits, confirmed alerts', 'District pilot, grant funded (est.)'], ['Hospitals (Dischargely, live)', 'Discharge summaries in 10–15 min, not 30–40', '₹10–15 lakh setup + ~₹2 lakh / month']]
 table(s, 0.35, 1.45, 9.3, rows, [2.2, 4.2, 2.9], size=11)
-tb(s, 0.35, 3.55, 9.3, 1.7, [[('b', 'Runway: '), ('', 'Dischargely hospital revenue funds the FirstSign pilot; year 3 ≈ ₹5 Cr combined (est.: 10 hospitals + 250 distributors).')], [('b', 'Go-to-market: '), ('', 'start with distributors who already take WhatsApp orders; three free trials in Mumbai, ask for payment on day 30.')], [('b', 'Open signal: '), ('', 'no exclusive partner; we charge for measurement and proof, never for exclusivity.')], [('b', 'Weakest assumptions, tested first: '), ('', 'will a distributor pay; how slow the desk is today (time 20 real orders); does the signal hold (blind back-test on a known outbreak).')]], size=12)
+tb(s, 0.35, 3.55, 9.3, 1.7, [[('b', 'Runway: '), ('', 'Dischargely hospital revenue funds the FirstSign pilot. Year 3 (est.): FirstSign ≈ ₹1.1 Cr a year on its own; Dischargely ≈ ₹2.4 Cr a year plus setup fees.')], [('b', 'The business vs the bet: '), ('', 'the order desk is what distributors pay for; the illness signal is the research bet the pilot tests. No distributor has paid yet; three free trials come first.')], [('b', 'Go-to-market: '), ('', 'start with distributors who already take WhatsApp orders; three free trials in Mumbai, ask for payment on day 30.')], [('b', 'Open signal: '), ('', 'no exclusive partner; we charge for measurement and proof, never for exclusivity.')], [('b', 'Weakest assumptions, tested first: '), ('', 'will a distributor pay; how slow the desk is today (time 20 real orders); does the signal hold (blind back-test on a known outbreak).')]], size=12)
 
 # slide 14: team and links
 s = S[14]
 tb(s, 0.28, 0.73, 9.0, 0.6, [[('', 'Team, proof and links')]], size=24)
 tb(s, 0.35, 1.45, 4.55, 3.8, [[('bB', 'Why us')], [('b', 'Dischargely: '), ('', 'our live hospital product; discharge summaries in 10–15 min instead of 30–40, paid for today.')], [('b', '3rd place, Andhra Pradesh health-surveillance hackathon: '), ('', 'disease tracking from ~10,000 coded outpatient records; the ASHA voice report started there.')], [('b', 'Team: '), ('', 'Utkarsh Tiwari, Sourav Dasgupta.')]], size=12)
-tb(s, 5.05, 1.45, 4.6, 3.8, [[('bB', 'Try it')], [('b', 'Live: '), ('', 'firstsign-735269146498.asia-south1.run.app')], [('b', 'Sign in: '), ('', 'any account on the sign-in page, password “firstsign”')], [('b', 'Code: '), ('', 'github.com/thebigsurf/firstsign-buildathon')], [('b', 'Data: '), ('g', 'chemists, orders and history are simulated and labelled on every screen; weather and air are real (Open-Meteo).')]], size=12)
+tb(s, 5.05, 1.45, 4.6, 3.8, [[('bB', 'Try it')], [('b', 'Live: '), ('', 'firstsign-735269146498.asia-south1.run.app')], [('b', 'Sign in: '), ('', 'any account on the sign-in page, password “firstsign”')], [('b', 'Code: '), ('', 'github.com/thebigsurf/firstsign-buildathon')], [('b', 'Data: '), ('g', 'chemists, orders and history are simulated and labelled on every screen; weather and air are real (Open-Meteo).')], [('b', 'Sign-in and privacy: '), ('g', 'the sign-in is a demo gate; production checks identity on the server for every write. Only counts by pin code leave a distributor; chemist identity stays under a data-sharing agreement (DPDP Act).')]], size=12)
 
 img(S[14], IMG + 'dx_volume.png', 0.35, 3.5, w=4.4)
 tb(S[14], 0.35, 4.6, 4.5, 0.3, [[('g', 'Dischargely: weekly summaries in our live hospital, Jun–Sep 2026')]], size=9)
