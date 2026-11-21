@@ -77,14 +77,14 @@ flowchart LR
 
 | Google service | What it does here |
 |---|---|
-| Gemini 3.5 Flash (fallback: 3.8 Flash, 2.5 Flash) | Reads voice notes and handwriting, matches to the catalogue, and structures ASHA reports. Always uses a JSON response schema. |
+| Gemini 3.5 Flash (fallback: 3.8 Flash, 3.1 Flash-Lite) | Reads voice notes and handwriting, matches to the catalogue, and structures ASHA reports. Always uses a JSON response schema. |
 | Gemini 4 Hydrogen (fallback: 3.5 Flash) | Reasoning step of the agent: why is this area rising, and what should each person do. |
 | Google Search grounding | Gives the agent cited, external evidence. Sources are shown to the officer. |
 | Cloud Run (asia-south1) | Hosts the app and API on one port, min 1 instance for the demo. |
 | Secret Manager | Holds `GEMINI_API_KEY`; never baked into the image. |
 | Cloud Build and Artifact Registry | Build and store the container image. |
 | Firestore (optional) | `STORAGE=firestore` persists orders, audit and alerts. Default is local. |
-| BigQuery (optional) | `SIGNAL_BACKEND=bigquery` exports counts and uses `AI.FORECAST` for baselines. Default is local. |
+| BigQuery (optional) | `SIGNAL_BACKEND=bigquery` exports counts and uses `AI.FORECAST` for baselines. Written as a design and not yet run against BigQuery; default is local. |
 
 Every model call has a fallback chain on 429/503, exponential backoff, a disk cache keyed by input hash, and an offline mode so the demo never dies. When a result comes from the pre-recorded fallback, the UI labels it `offline-sample`.
 
@@ -112,7 +112,7 @@ This builds the frontend if needed and serves the app and API on <http://localho
 Tests:
 
 ```bash
-cd backend && python -m pytest        # 119 tests, offline
+cd backend && python -m pytest        # 132 tests, offline (frontend: 41 with npm test)
 cd frontend && npm test && npm run lint
 ```
 
@@ -152,7 +152,7 @@ docker run --rm -p 8080:8080 --env-file .env firstsign
 | Path | What is there |
 |---|---|
 | `ARCHITECTURE.md` | The build contract: layout, API, data files, rules |
-| `backend/` | FastAPI app (`app/`), tests, `RUN_LOG.md` with live-run results |
+| `backend/` | FastAPI app (`app/`) and tests; earlier run logs are in `docs/archive/` |
 | `frontend/` | Vite, React, TypeScript, Tailwind app; builds to `frontend/dist` |
 | `data/` | Simulated seed data, samples (voice, photos) and generators |
 | `docs/` | Product, metrics, design, demo script, deck, contract requests |

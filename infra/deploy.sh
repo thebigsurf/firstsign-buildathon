@@ -65,7 +65,7 @@ g run deploy "$SERVICE" \
   --cpu 1 \
   --timeout 300 \
   --set-secrets "GEMINI_API_KEY=${SECRET}:latest" \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_REGION=${REGION},ALLOW_DEMO_RESET=0"
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_REGION=${REGION},ALLOW_DEMO_RESET=0,RATE_LIMIT_PER_MIN=60"
 
 URL="$(g run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
 echo "Live URL: $URL"

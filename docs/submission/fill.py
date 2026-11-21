@@ -165,9 +165,9 @@ rows = [['Layer', 'Technology', 'Why'],
         ['Backend', 'Python 3.11, FastAPI, Pydantic v2, google-genai SDK, rapidfuzz', 'typed, schema-checked JSON'],
         ['Frontend', 'React 18, TypeScript, Vite, Tailwind, Leaflet + OpenStreetMap', 'phone-first, accessible, bilingual'],
         ['Cloud', 'Cloud Run (asia-south1), Secret Manager, Cloud Build, Artifact Registry', 'serverless; key never in code'],
-        ['Data (optional)', 'Firestore, BigQuery AI.FORECAST', 'built behind flags for scale'],
+        ['Data (optional)', 'Firestore, BigQuery AI.FORECAST', 'designed behind flags, off by default'],
         ['Context data', 'Open-Meteo weather and air quality (real)', 'heat and rain context for alerts'],
-        ['Quality', 'pytest (120), Vitest (38), ESLint, tsc, Playwright, axe-core', 'tested end to end']]
+        ['Quality', 'pytest (132), Vitest (41), ESLint, tsc, Playwright, axe-core', 'tested end to end']]
 table(s, 0.35, 1.35, 9.3, rows, [1.4, 4.6, 3.3], size=10.5)
 
 # slide 9: cost
@@ -175,7 +175,7 @@ s = S[9]
 rows = [['Item', 'Estimate', 'Basis'],
         ['Price to a distributor', '₹3,000–4,500 per desk per month', 'our estimate; tested in the pilot'],
         ['Our cost per order', '₹0.4–0.7, mostly human checking', 'our estimate'],
-        ['Gemini per order', 'a fraction of a rupee on Flash models', 'per-call token ledger in the repo'],
+        ['Gemini per order', '₹0.25 (measured, AI only)', '20 live calls on Gemini 3.5 Flash; token ledger'],
         ['Cloud Run', 'one always-on instance', '₹1,000 budget alert set'],
         ['Chemist', 'free', 'no new app'],
         ['Public-health pilot', '₹25 lakh–2 Cr per district', 'grant or CSR funded; our estimate'],
@@ -194,20 +194,20 @@ for k, (pth, cap) in enumerate(shots):
 # slide 11: performance
 s = S[11]
 rows = [['Measure', 'Result', 'How measured'],
-        ['Order lines read right', '55 of 56 (98%)', '10 sample orders: 4 voice, 3 photo, 3 text; live Gemini, no cache'],
+        ['Order lines read right', '55 of 56 (98%)', '10 sample orders: 4 voice, 3 photo, 3 text; gemini-3.1-flash-lite'],
         ['Wrong lines shown as certain', '0', 'same run; doubt goes yellow instead'],
-        ['Parse latency', '~6 s median (3.6–8.5 s)', 'gemini-3.1-flash-lite; 5.5 s on 3.5-flash in a judge test'],
+        ['Parse latency', '4.6 s median, 7.2 s p95', '20 live calls on gemini-3.5-flash'],
         ['ASHA report fields right', '35 of 36', '4 voice reports: Hindi ×3, Marathi ×1'],
-        ['Alert explanation', '75–93 s cold, 0.3 s cached', 'grounded, 8 sources each, reasoning model'],
+        ['Alert explanation', '~31–37 s cold, 0.1 s cached', 'Search-grounded step + reasoning step; 4–7 sources'],
         ['Signal back-test', 'both seeded events alert; decoy suppressed', 'simulated history, labelled as such'],
-        ['Tests', '120 backend + 38 frontend passing', 'pytest, Vitest, lint, tsc, build']]
+        ['AI cost', '₹0.25 per order, ₹0.05 per ASHA report', 'usage ledger; ~68% of prompt tokens cached']]
 table(s, 0.35, 1.35, 9.3, rows, [2.4, 2.6, 4.3], size=10.5)
 tb(s, 0.35, 4.75, 9.3, 0.5, [[('g', 'Small sample made for the test; the pilot measures accuracy on real orders (clerk edit rate) and alert precision against ASHA findings.')]], size=10)
 
 # slide 12: future
 s = S[12]
 L = [('90-day Mumbai pilot', '5 distributors around Kurla and Sion, 1 ward health office, 10 ASHAs; pass marks set before we start'), ('Billing write-back', 'approved orders straight into Marg and other billing software'), ('WhatsApp Business API', 'orders arrive without a forward or upload step'), ('Vertex AI', 'service-account auth, provisioned throughput, evals on real clerk edits')]
-R = [('Cloud-native data', 'Firestore for state, BigQuery AI.FORECAST for baselines (already built)'), ('More languages', 'Gujarati, Bengali, Tamil voice orders'), ('Labels from Dischargely', 'doctor-confirmed medicine–diagnosis pairs teach what a rise means'), ('Published precision', 'lead time and false alarms against ASHA findings, every season')]
+R = [('Cloud-native data', 'Firestore for state, BigQuery AI.FORECAST for baselines (designed, to switch on)'), ('More languages', 'Gujarati, Bengali, Tamil voice orders'), ('Labels from Dischargely', 'doctor-confirmed medicine–diagnosis pairs teach what a rise means'), ('Published precision', 'lead time and false alarms against ASHA findings, every season')]
 for xs, lst in [(0.35, L), (5.05, R)]:
     tb(s, xs, 1.3, 4.55, 4.0, [[('b', '•  ' + a + ': '), ('g', b)] for a, b in lst], size=12)
 

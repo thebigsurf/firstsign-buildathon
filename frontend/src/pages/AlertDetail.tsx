@@ -365,7 +365,8 @@ export function AlertDetail() {
                   </div>
 
                   <div>
-                    <h3 className="text-h3">Sources found with Google Search</h3>
+                    <h3 className="text-h3">Google Search context for this area</h3>
+                    <p className="m-0 mt-1 text-sm text-muted">Live web results for the area and dates. They are context, not proof of this alert; the demo order history is simulated.</p>
                     {shownExplanation.sources.length === 0 ? (
                       <p className="m-0 mt-1 text-sm">
                         No outside sources found. The explanation uses our order data only.

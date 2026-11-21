@@ -15,10 +15,10 @@ Measured on 10 simulated samples, live Gemini, no cache: 55 of 56 lines found (9
 Four rules stop a line from being green: a spelling far from the listed one, a name shared by several items, the model saying it interpreted the line, or generic-word-only overlap. The clerk sees a reason on every yellow line, and a warning if words were left unplaced. Every approval stores what the model said and what the clerk changed.
 
 **5. Which Google services are actually live?**
-Gemini API for audio, vision, structured output and the agent; Cloud Run, Secret Manager, Cloud Build and Artifact Registry for deployment. Firestore and BigQuery AI.FORECAST are written as optional paths and off by default; we have not tested them at scale. Search grounding is built but returned no sources on our free-tier key, and the app says so.
+Gemini API for audio, vision, structured output and the agent; Cloud Run, Secret Manager, Cloud Build and Artifact Registry for deployment. Firestore and BigQuery AI.FORECAST are written as optional paths and off by default; we have not tested them at scale. Search grounding runs live on a billed key and returns cited sources.
 
-**6. Your Google Search grounding shows no sources. Is it real?**
-The code path is real and the agent labels causes as hypotheses when there is no source. It was blocked by free-tier quota on our key (429). With a billed key we cache grounded explanations for the three alerts. We would rather show "no sources" than invent one.
+**6. Your Google Search grounding shows real news for a simulated spike. Isn't that fake corroboration?**
+Grounding is a live Google Search for the area and dates, shown as context, not as proof. The agent is told to report only what sources say and to call causes hypotheses. The order history in the demo is simulated and labelled; in the pilot the dates and orders are real.
 
 **7. Is the data real?**
 No. Order history, chemists, ASHAs and notes are simulated and labelled in every screen. The signal engine is deterministic and tested on the seeded events. The real test is the pilot. We use no patient names; ASHA reports hold counts only.

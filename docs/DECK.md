@@ -1,6 +1,6 @@
 # FirstSign: final deck content (10 slides)
 
-*Rubric key: F Functional 30, T Tech 20, G Google AI 20, P Problem fit 15, U UX 10, I Innovation 5. Numbers marked **measured** come from `QA_REPORT_functional.md` (21 Nov, live Gemini, no cache). Everything else is labelled est. or target. Screenshots: final files go in `docs/screens/` (not yet created); until then use the `docs/qa_screens/` file named on each slide. Export as PDF, under 5 MB.*
+*Rubric key: F Functional 30, T Tech 20, G Google AI 20, P Problem fit 15, U UX 10, I Innovation 5. Numbers marked **measured** come from `docs/archive/QA_REPORT_functional_v1.md` (21 Nov, live Gemini, no cache). Everything else is labelled est. or target. Screenshots: final files go in `docs/screens/` (not yet created); until then use the `docs/qa_screens/` file named on each slide. Export as PDF, under 5 MB.*
 
 *If the organisers' PDF template is required, map as: slide 2-3 = Problem, 4 = Solution, 5 = Architecture, 6 = Google AI tools, 7 = Google AI models, then keep 8-10 as appendix.*
 
