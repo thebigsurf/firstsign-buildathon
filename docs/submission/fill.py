@@ -178,9 +178,10 @@ rows = [['Item', 'Estimate', 'Basis'],
         ['Gemini per order', 'a fraction of a rupee on Flash models', 'per-call token ledger in the repo'],
         ['Cloud Run', 'one always-on instance', '₹1,000 budget alert set'],
         ['Chemist', 'free', 'no new app'],
-        ['Public-health pilot', '₹25 lakh–2 Cr per district', 'grant or CSR funded; our estimate']]
+        ['Public-health pilot', '₹25 lakh–2 Cr per district', 'grant or CSR funded; our estimate'],
+        ['Dischargely (live revenue)', '₹10–15 lakh setup + ~₹2 lakh/month per hospital', 'our live hospital contract; funds the FirstSign pilot']]
 table(s, 0.35, 1.35, 9.3, rows, [2.4, 3.4, 3.5], size=11)
-tb(s, 0.35, 4.55, 9.3, 0.7, [[('b', 'Year-3 base (est.): '), ('', '250 distributors at the desk price ≈ ₹1.35 Cr a year. Dischargely, our hospital product, is already paid for today.')]], size=12)
+tb(s, 0.35, 4.6, 9.3, 0.7, [[('b', 'Year 3 (est.): '), ('', '10 hospitals on Dischargely ≈ ₹2.4 Cr recurring + ~₹1.25 Cr setup; 250 distributors on FirstSign ≈ ₹1.35 Cr; ≈ ₹5 Cr combined before any grant.')]], size=12)
 
 # slide 10: snapshots
 s = S[10]
@@ -213,15 +214,18 @@ for xs, lst in [(0.35, L), (5.05, R)]:
 # slide 13: business model
 s = S[13]
 tb(s, 0.28, 0.73, 9.0, 0.6, [[('', 'Business model and go-to-market')]], size=24)
-rows = [['Who', 'Gets', 'Pays'], ['Distributor (buyer)', 'Order desk that frees part of a clerk; stock radar', '₹3,000–4,500 / month per desk (est.)'], ['Chemist', 'Orders billed right, faster; no new app', 'Free'], ['Health office / CSR', 'Ranked ASHA visits, confirmed alerts', 'District pilot, grant funded (est.)'], ['Hospitals (Dischargely)', 'Discharge summaries in 10–15 min, not 30–40', 'Paying today']]
+rows = [['Who', 'Gets', 'Pays'], ['Distributor (buyer)', 'Order desk that frees part of a clerk; stock radar', '₹3,000–4,500 / month per desk (est.)'], ['Chemist', 'Orders billed right, faster; no new app', 'Free'], ['Health office / CSR', 'Ranked ASHA visits, confirmed alerts', 'District pilot, grant funded (est.)'], ['Hospitals (Dischargely, live)', 'Discharge summaries in 10–15 min, not 30–40', '₹10–15 lakh setup + ~₹2 lakh / month']]
 table(s, 0.35, 1.45, 9.3, rows, [2.2, 4.2, 2.9], size=11)
-tb(s, 0.35, 3.55, 9.3, 1.7, [[('b', 'Go-to-market: '), ('', 'start with distributors who already take WhatsApp orders; three free trials in Mumbai, ask for payment on day 30.')], [('b', 'Open signal: '), ('', 'no exclusive partner; we charge for measurement and proof, never for exclusivity.')], [('b', 'Weakest assumptions, tested first: '), ('', 'will a distributor pay; how slow the desk is today (time 20 real orders); does the signal hold (blind back-test on a known outbreak).')]], size=12)
+tb(s, 0.35, 3.55, 9.3, 1.7, [[('b', 'Runway: '), ('', 'Dischargely hospital revenue funds the FirstSign pilot; year 3 ≈ ₹5 Cr combined (est.: 10 hospitals + 250 distributors).')], [('b', 'Go-to-market: '), ('', 'start with distributors who already take WhatsApp orders; three free trials in Mumbai, ask for payment on day 30.')], [('b', 'Open signal: '), ('', 'no exclusive partner; we charge for measurement and proof, never for exclusivity.')], [('b', 'Weakest assumptions, tested first: '), ('', 'will a distributor pay; how slow the desk is today (time 20 real orders); does the signal hold (blind back-test on a known outbreak).')]], size=12)
 
 # slide 14: team and links
 s = S[14]
 tb(s, 0.28, 0.73, 9.0, 0.6, [[('', 'Team, proof and links')]], size=24)
 tb(s, 0.35, 1.45, 4.55, 3.8, [[('bB', 'Why us')], [('b', 'Dischargely: '), ('', 'our live hospital product; discharge summaries in 10–15 min instead of 30–40, paid for today.')], [('b', '3rd place, Andhra Pradesh health-surveillance hackathon: '), ('', 'disease tracking from ~10,000 coded outpatient records; the ASHA voice report started there.')], [('b', 'Team: '), ('', 'Utkarsh Tiwari, Sourav Dasgupta.')]], size=12)
 tb(s, 5.05, 1.45, 4.6, 3.8, [[('bB', 'Try it')], [('b', 'Live: '), ('', 'firstsign-735269146498.asia-south1.run.app')], [('b', 'Sign in: '), ('', 'any account on the sign-in page, password “firstsign”')], [('b', 'Code: '), ('', 'github.com/thebigsurf/firstsign-buildathon')], [('b', 'Data: '), ('g', 'chemists, orders and history are simulated and labelled on every screen; weather and air are real (Open-Meteo).')]], size=12)
+
+img(S[14], IMG + 'dx_volume.png', 0.35, 3.5, w=4.4)
+tb(S[14], 0.35, 4.6, 4.5, 0.3, [[('g', 'Dischargely: weekly summaries in our live hospital, Jun–Sep 2026')]], size=9)
 
 # drop the instruction slide
 ids = p.slides._sldIdLst; first = list(ids)[0]
