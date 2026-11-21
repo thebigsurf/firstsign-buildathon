@@ -6,7 +6,8 @@ export type Theme = "light" | "dark";
 const KEY = "fs-theme";
 
 function systemTheme(): Theme {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // Light is the default; dark only when the user picks it.
+  return "light";
 }
 
 function currentTheme(): Theme {

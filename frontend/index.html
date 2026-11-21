@@ -10,7 +10,7 @@
       (function () {
         try {
           var t = localStorage.getItem("fs-theme");
-          if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+          document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
         } catch (e) {
           /* storage blocked: follow the OS setting */
         }
