@@ -60,6 +60,7 @@ g run deploy "$SERVICE" \
   --region "$REGION" \
   --allow-unauthenticated \
   --min-instances 1 \
+  --max-instances 1 
   --memory 1Gi \
   --cpu 1 \
   --timeout 300 \
