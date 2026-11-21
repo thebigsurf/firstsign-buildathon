@@ -1,5 +1,29 @@
 # FirstSign
 
+## Submission links
+
+| What | Link |
+|---|---|
+| Live product | https://firstsign-735269146498.asia-south1.run.app (also https://firstsign-jbzxxect5q-el.a.run.app) |
+| Demo video (2:16, plays in the browser) | https://firstsign-735269146498.asia-south1.run.app/demo.mp4 |
+| Demo video (file in this repo) | [docs/video/FirstSign_demo.mp4](docs/video/FirstSign_demo.mp4) · captions: [FirstSign_demo_captions.srt](docs/video/FirstSign_demo_captions.srt) |
+| Pitch deck (PDF) | [docs/FirstSign_Pitch_Deck.pdf](docs/FirstSign_Pitch_Deck.pdf) |
+| Submission deck (organisers' template) | [docs/submission/FirstSign_Final_Submission.pptx](docs/submission/FirstSign_Final_Submission.pptx) · [PDF](docs/submission/FirstSign_Final_Submission.pdf) |
+
+**Sign in:** the live product opens on a demo sign-in. Every account uses the password `firstsign`:
+
+| Account | Opens |
+|---|---|
+| clerk@saikrupa.demo | Distributor order inbox |
+| owner@saikrupa.demo | Stock radar |
+| officer@wardhealth.demo | Health officer map and alerts |
+| sunita@asha.demo | ASHA phone view (Hindi first) |
+| chemist@unitymedical.demo | Chemist: send an order |
+| founder@firstsign.demo | Every workspace, with a switcher |
+
+The sign-in is a demo gate for the jury, not real authentication.
+
+
 FirstSign is an AI order desk for Indian medicine distributors. Chemists send orders on WhatsApp as voice notes or photos of handwritten lists. FirstSign reads them (Hindi, Marathi, English and Hinglish) and turns them into ready-to-bill orders that a clerk checks and approves.
 
 Because every order passes through, FirstSign also sees which medicine groups are rising in each pin code compared with normal. It shows that as:

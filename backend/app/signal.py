@@ -25,7 +25,7 @@ Clusters   Alerting pins of the same group within 3 km of each other form one al
            watch-only pins (two or more) form a watch.
 Confidence signal strength (ratio and z, capped) x breadth factor x co-movement bonus, then moved by
            ASHA reports in log-odds space: counts above the background rate raise it, near-zero counts lower it.
-Status     confirmed : confidence >= 0.70 and at least one ASHA report above the background rate
+Status     confirmed : confidence >= 0.70 and at least two ASHA reports above the background rate (CONFIRM_REPORTS = 2)
            dismissed : two or more ASHA reports near zero and none above background
            open      : otherwise
 """
