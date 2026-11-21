@@ -24,7 +24,7 @@ Only click what is listed. Do not mention Firestore or BigQuery as live, and do 
 
 ## Known limits, say if asked
 - On the free-tier key, Google Search grounding returns no sources and the screen says so. With a billed key it is live.
-- The Marathi voice note (msg_03) can time out and fall back to a labelled sample. Use msg_02 or msg_01 on stage.
+- Run `python -m app.warm` before going on stage. msg_03 (Marathi) is then cached; cold, it falls back to a labelled sample after 25 s. Approving an order changes the alert counts, so a cached explanation is replaced by the last saved Gemini explanation (labelled) if Gemini is down.
 - Confirming an alert takes two ASHA reports on purpose. One report moves confidence but leaves it open.
 - The faster models (3.5-flash, 3.8-flash, 4-hydrogen) are quota-limited on the free key; the chain falls back to 3.1-flash-lite (about 6 s per parse).
 

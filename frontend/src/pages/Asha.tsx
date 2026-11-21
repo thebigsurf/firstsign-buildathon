@@ -1,13 +1,17 @@
 import { Check, FileUp, Keyboard, Minus, Plus, RefreshCw, TriangleAlert, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { api } from "../api";
+import { useAuth } from "../lib/AuthContext";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { ConfidenceMeter } from "../components/ui/ConfidenceMeter";
+import { AshaRecentTable } from "../components/officer/ExtendedPanels";
+import { MiniChart } from "../components/ui/MiniChart";
 import { Modal } from "../components/ui/Modal";
 import { Recorder, type RecordedAudio } from "../components/ui/Recorder";
 import { Skeleton } from "../components/ui/States";
 import { cx, readStored, writeStored } from "../lib/format";
+import { ashaSeries, lastDays } from "../lib/extended";
 import { toApiError, useAsync, useDocumentTitle } from "../lib/hooks";
 import { useRefData } from "../lib/refdata";
 import { applyAshaDefaultTheme, releaseAshaDefaultTheme } from "../lib/theme";
@@ -117,6 +121,35 @@ function OwnPinLocalities({ asha, lang, onRecord }: { asha: Asha; lang: AshaLang
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function RecentReports({ asha, lang }: { asha: Asha; lang: AshaLang }) {
+  const q = useAsync((s) => api.ashaHistory(asha.pin, 14, s), [asha.pin]);
+  const rows = lastDays(q.data ?? [], 14).reverse();
+  const t = tr("lastDays", lang);
+  const series = ashaSeries(rows);
+  if (q.loading && !q.data) return <Skeleton className="h-32 w-full" />;
+  return (
+    <section aria-labelledby="recent-h" className="space-y-3">
+      <h2 id="recent-h" className="text-asha font-semibold">
+        <span lang={t.lang}>{t.primary}</span>
+        <span className="block text-sm font-normal text-muted">{t.secondary} (simulated)</span>
+      </h2>
+      {rows.length === 0 ? (
+        <p className="m-0 text-base text-muted">
+          <Bi k="noHistory" lang={lang} inline />
+        </p>
+      ) : (
+        <div className="card space-y-3 p-4">
+          <MiniChart dates={series.dates} series={series.series} label={`Your reports, last 14 days: households with fever, diarrhoea and cough.`} />
+          <AshaRecentTable
+            rows={rows}
+            headers={{ day: tr("dayCol", lang).primary, homes: tr("homes", lang).primary, fever: tr("fever", lang).primary, diarrhoea: tr("diarrhoea", lang).primary, cough: tr("cough", lang).primary }}
+          />
+        </div>
+      )}
     </section>
   );
 }
@@ -642,7 +675,9 @@ function DoneStep({ result, values, lang, onNext, onList }: { result: AshaReport
 export function AshaFlow() {
   useDocumentTitle("ASHA");
   const { ashas, loading: refLoading } = useRefData();
-  const [ashaId, setAshaId] = useState<string | null>(() => readStored(ASHA_KEY) || null);
+  const { user } = useAuth();
+  const fixedAsha = user?.roleId === "asha" ? user.ashaId : undefined;
+  const [ashaId, setAshaId] = useState<string | null>(() => fixedAsha ?? (readStored(ASHA_KEY) || null));
   const [step, setStep] = useState<Step>("list");
   const [visit, setVisit] = useState<AshaVisit | null>(null);
   const [result, setResult] = useState<AshaReportResult | null>(null);
@@ -746,12 +781,15 @@ export function AshaFlow() {
                   setStep("record");
                 }}
               />
-              <button type="button" onClick={() => {
-                  setAshaId(null);
-                  writeStored(ASHA_KEY, "");
-                }} className="min-h-14 w-full text-base text-accentText underline">
-                <Bi k="switchPerson" lang={lang} inline />
-              </button>
+              <RecentReports asha={asha} lang={lang} />
+              {!fixedAsha && (
+                <button type="button" onClick={() => {
+                    setAshaId(null);
+                    writeStored(ASHA_KEY, "");
+                  }} className="min-h-14 w-full text-base text-accentText underline">
+                  <Bi k="switchPerson" lang={lang} inline />
+                </button>
+              )}
             </>
           )}
           {step === "record" && visit && <RecordStep visit={visit} lang={lang} sending={sending} error={error} onSend={(i) => void send(i)} />}

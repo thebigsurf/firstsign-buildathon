@@ -27,7 +27,8 @@ from .errors import AppError
 
 log = logging.getLogger("firstsign.store")
 
-COLLECTIONS = ("orders", "parses", "audit", "asha_reports", "explanations", "approvals", "parse_log")
+COLLECTIONS = ("orders", "parses", "audit", "asha_reports", "explanations", "approvals", "parse_log", "messages",
+               "stockouts")
 
 
 def utc_now() -> str:
@@ -223,6 +224,24 @@ class Store(ABC):
 
     def parse_log(self) -> list[dict[str, Any]]:
         return self._list("parse_log")
+
+    # messages sent by chemists through the app (they appear in the distributor inbox like the bundled ones) -----------
+    def add_message(self, message: dict[str, Any]) -> None:
+        self._append("messages", message)
+
+    def list_messages(self) -> list[dict[str, Any]]:
+        return self._list("messages")
+
+    # "not available" mentions read from live messages (feeds the stock-out view and the radar) -------------------------
+    def add_stockout(self, item: dict[str, Any]) -> bool:
+        """Store a live 'not available' mention once per message and item. Returns False for a duplicate."""
+        if any(s["key"] == item["key"] for s in self._list("stockouts")):
+            return False
+        self._append("stockouts", item)
+        return True
+
+    def list_stockouts(self) -> list[dict[str, Any]]:
+        return self._list("stockouts")
 
     # audit -----------------------------------------------------------------
     def add_audit(self, actor: str, kind: str, ref_id: str, summary: str, *, before: dict[str, Any] | None = None,

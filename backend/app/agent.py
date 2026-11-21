@@ -87,11 +87,16 @@ class ExplainAgent:
             raw = ModelExplain.model_validate(result.json())
         except (UpstreamError, ValueError) as exc:
             log.warning("reasoning call failed (%s); using data-only explanation", type(exc).__name__)
+            last = self._last_good(alert.alert_id)
+            if last is not None:
+                return last.model_copy(update={
+                    "search_note": last.search_note + " Earlier Gemini explanation for this alert, shown because "
+                                   "Gemini was unavailable just now; the counts above are live."})
             return self._fallback(alert, context, "data-only-fallback", search_ms, sources,
                                   search_note + " The reasoning model was unavailable, so this uses our data only.",
                                   queries)
         visits = self._clean_visits(raw, alert, context)
-        return Explanation(
+        built = Explanation(
             alert_id=alert.alert_id,
             summary=raw.summary.strip(),
             likely_causes=[LikelyCause(cause=c.cause, evidence=c.evidence, confidence=min(max(c.confidence, 0), 1))
@@ -102,6 +107,30 @@ class ExplainAgent:
             model=result.model, latency_ms=search_ms + result.latency_ms,
             grounded=bool(sources), cached=False, search_note=search_note, search_queries=queries,
         )
+        self._save_last_good(built)
+        return built
+
+    def _last_good_path(self, alert_id: str):
+        cache_dir = getattr(self.gemini.settings, "cache_dir", None)
+        return cache_dir / f"explain_last_{alert_id}.json" if cache_dir else None
+
+    def _save_last_good(self, explanation: Explanation) -> None:
+        path = self._last_good_path(explanation.alert_id)
+        if path is None:
+            return
+        try:
+            path.write_text(explanation.model_dump_json(), encoding="utf-8")
+        except OSError:
+            log.warning("could not save last-good explanation")
+
+    def _last_good(self, alert_id: str) -> Explanation | None:
+        path = self._last_good_path(alert_id)
+        if path is None:
+            return None
+        try:
+            return Explanation.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
 
     def _search(self, alert: Alert, context: dict[str, Any]) -> tuple[str, list[Source], int, str, list[str]]:
         areas = ", ".join(f"{self.ref.area(p)} (pin {p})" for p in alert.pins)

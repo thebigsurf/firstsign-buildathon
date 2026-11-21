@@ -1,5 +1,7 @@
-import { FlaskConical } from "lucide-react";
+import { BadgeCheck, Check, CircleHelp, ClipboardCheck, EyeOff, FlaskConical, KeyRound, type LucideIcon } from "lucide-react";
 import { api } from "../api";
+import { Badge } from "../components/ui/Badge";
+import { PulseLine } from "../components/ui/Pulse";
 import { ErrorPanel, Skeleton } from "../components/ui/States";
 import { useAsync, useDocumentTitle } from "../lib/hooks";
 
@@ -64,6 +66,43 @@ function FlowDiagram() {
   );
 }
 
+const STEPS = [
+  { title: "Chemists send orders as they always do.", body: "A voice note or a photo of a handwritten list, on WhatsApp." },
+  { title: "FirstSign reads them. A clerk checks and approves.", body: "Every uncertain line is shown. Nothing is silently changed." },
+  { title: "Rising groups trigger a visit list. ASHAs confirm on the ground.", body: "And every report teaches the system." },
+];
+
+const TRUST: Array<[LucideIcon, string]> = [
+  [ClipboardCheck, "Every approval is logged"],
+  [BadgeCheck, "Nothing is corrected silently"],
+  [EyeOff, "No patient names stored"],
+  [FlaskConical, "Simulated data"],
+];
+
+function PreviewCard() {
+  return (
+    <div className="card space-y-3" role="img" aria-label="Example of a parsed order with one line that needs a check and one matched line">
+      <p className="label-xs">Example, read from a voice note</p>
+      <div className="rounded-md border-l-4 border-confUnc bg-confUncBg p-3">
+        <div className="flex items-center justify-between gap-2">
+          <Badge className="bg-surface text-confUnc" icon={CircleHelp}>Check this</Badge>
+          <span className="mono text-sm">10 strips</span>
+        </div>
+        <p lang="hi" className="mt-2 font-medium">&ldquo;पैन डी दस पत्ते&rdquo;</p>
+        <p className="text-sm text-text">Heard &ldquo;pan di&rdquo;: could be Pan-D 40 or Pantop-D 40.</p>
+      </div>
+      <div className="rounded-md border border-border bg-surface p-3">
+        <div className="flex items-center justify-between gap-2">
+          <Badge className="bg-confHighBg text-confHigh" icon={Check}>Matched</Badge>
+          <span className="mono text-sm">20 strips</span>
+        </div>
+        <p lang="hi" className="mt-2 font-medium">&ldquo;डोलो छे सौ पचास बीस&rdquo;</p>
+        <p className="text-sm text-text">Dolo 650 mg tablet, strip of 15</p>
+      </div>
+    </div>
+  );
+}
+
 function Row({ job, what, why }: { job: string; what: string; why: string }) {
   return (
     <tr className="border-t border-border align-top">
@@ -84,7 +123,8 @@ export function About() {
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 md:py-12">
       <header className="space-y-3">
-        <h1 className="text-h1">How FirstSign works</h1>
+        <p lang="hi" className="font-display text-xl font-semibold text-accentText">पहला संकेत</p>
+        <h1 className="text-h1">About FirstSign</h1>
         <p className="text-lg text-muted">A medicine distributor&rsquo;s AI order desk that also notices when a neighbourhood starts falling ill.</p>
       </header>
 
@@ -102,6 +142,42 @@ export function About() {
           Each ASHA records what she saw as a voice note in her own language. Gemini turns it into counts. Her report confirms or cancels the alert and
           becomes labelled ground truth for the next one.
         </p>
+      </section>
+
+      <PreviewCard />
+
+      <section aria-labelledby="how-h" className="space-y-6">
+        <div className="flex items-center gap-4">
+          <h2 id="how-h" className="text-h2">How it works</h2>
+          <PulseLine width={96} className="hidden sm:block" />
+        </div>
+        <ol className="m-0 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-3">
+          {STEPS.map((st, i) => (
+            <li key={st.title} className="flex gap-4">
+              <span className="mono flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-accentFg" aria-hidden="true">
+                {i + 1}
+              </span>
+              <div>
+                <h3 className="text-h3">
+                  <span className="sr-only">Step {i + 1}: </span>
+                  {st.title}
+                </h3>
+                <p className="mt-1 text-muted">{st.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-label="Our promises">
+        <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 lg:grid-cols-4">
+          {TRUST.map(([Icon, text]) => (
+            <li key={text} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3 text-sm font-medium">
+              <Icon size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-accentText" />
+              {text}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section aria-labelledby="flow-h" className="space-y-4">
@@ -137,6 +213,18 @@ export function About() {
           The 90 days of order history, the chemists, the ASHA workers and the localities are simulated for this demo. The seeded events (a
           water-borne rise, a fever rise, a bad-air bump and one bulk-buying shop that must not raise an alert) are made up to show how the system reasons.
           No real patients or people appear anywhere.
+        </p>
+        <p lang="hi" className="m-0 text-sm">यह डेमो डेटा है, असली नहीं।</p>
+      </section>
+
+      <section aria-labelledby="auth-h" className="space-y-2">
+        <h2 id="auth-h" className="flex items-center gap-2 text-h2">
+          <KeyRound size={20} strokeWidth={1.75} aria-hidden="true" /> The sign-in is a demo gate
+        </h2>
+        <p>
+          The sign-in screen is a demo gate, not real authentication. The accounts are a fixed list of fictional people, the passwords are shown on
+          the login page, and the session lives only in this browser. It is there so the sandbox behaves like the real tool, with a workspace for
+          each role. Do not treat it as a security control.
         </p>
       </section>
 
@@ -188,6 +276,10 @@ export function About() {
           </dl>
         )}
       </section>
+
+      <footer className="border-t border-border pt-6 text-sm text-muted">
+        <p className="m-0">Built for the Google DeepMind x Google Cloud Startup Buildathon India 2026</p>
+      </footer>
     </div>
   );
 }

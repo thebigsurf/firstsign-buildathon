@@ -12,7 +12,7 @@ Because every order passes through, FirstSign also sees which medicine groups (f
 2. **Health officer view:** a ranked list of where ASHA workers should visit next.
 3. **ASHA view:** each ASHA records her visit observations as a voice note in her own language.
 
-Her report confirms or cancels the alert and becomes labelled ground truth.
+Her report moves the alert: one report raises or lowers its confidence, and **two independent reports are needed to confirm** it (a near-zero report lowers it). Each report becomes labelled ground truth.
 
 **Gemini's jobs:** reading voice, reading handwriting, matching to the catalogue, structuring ASHA reports, and running an agent that explains why an area is rising (using Google Search) and drafts the actions. A human approves every outbound action.
 
@@ -60,7 +60,7 @@ firstsign/
   - No patient names stored.
   - Orders store chemist ID, pin code, items and time only.
   - ASHA reports store counts, not names.
-  - Media files are processed in memory and not kept beyond the request (demo samples excepted).
+  - Media files are processed in memory and not kept beyond the request (demo samples excepted). The one exception is media a chemist sends through `POST /api/chemist/send`: it is kept under `backend/.state/media` so the clerk can replay it, and is not cleared by the demo reset.
 - **The demo history is SIMULATED.** The UI must label it ("Simulated history for demo").
 
 ## 4. Data files (`data/`, owned by the data engineer)
@@ -112,19 +112,33 @@ ParsedOrder { message_id|null, chemist_id, language, transcript, lines: [OrderLi
 | GET | `/api/pincodes` | |
 | GET | `/api/chemists` | |
 | GET | `/api/distributor` | |
-| GET | `/api/inbox` | Messages with status `new\|parsed\|approved` and the parsed result if any |
+| GET | `/api/inbox` | Bundled messages plus messages chemists sent through the app (`source:"chemist_send"`, `media_url`). Status `new\|parsed\|approved` and the parsed result if any |
 | POST | `/api/orders/parse` | Multipart: `file` (audio or image) or form field `text`, plus `chemist_id`, optional `message_id`. Returns `ParsedOrder` |
 | POST | `/api/orders` | Body: `{chemist_id, message_id, lines (as approved by the clerk), approved_by}`. Saves the order, updates live counts, writes an audit entry. Returns `{order_id}` |
 | GET | `/api/orders` | Recent approved orders |
 | GET | `/api/audit` | Who approved what and when; every line edit recorded (design for blame) |
 | GET | `/api/signal` | Query `days=30`. Returns `{as_of, cells:[{pin, group, today, baseline, ratio, z, breadth, level:"normal"\|"watch"\|"alert", series:[{date, units, baseline}]}]}` |
 | GET | `/api/alerts` | `[{alert_id, pins, group, level, ratio, breadth, started, confidence, status:"open"\|"confirmed"\|"dismissed", asha_reports}]`, built from co-movement rules |
-| GET | `/api/radar` | Distributor stock radar: `[{pin, area, group, skus:[{sku_id, brand, suggested_qty, reason}], ratio, chemists_affected}]` |
+| GET | `/api/radar` | Distributor stock radar: `[{pin, area, group, skus:[{sku_id, brand, suggested_qty, reason}], ratio, chemists_affected}]`. With `data/extended`, items chemists could not get last week rank first, `suggested_qty` adds the units already missed, and `reason` reads like "0 days of cover, 6 chemists in Sion asked last week. 241 units cover 5 days at today's pace plus 124 units already missed." |
 | POST | `/api/agent/explain` | Body `{alert_id}`. Returns `{summary, likely_causes:[{cause, evidence, confidence}], sources:[{title, url}], actions:{distributor_note, officer_note, asha_visit_list:[{locality_id, name, landmark, priority, reason}]}, model, latency_ms}`. Uses Gemini with Google Search grounding plus our own data as tool results. Cache per alert |
 | POST | `/api/actions/approve` | Body `{alert_id, action:"distributor_note"\|"officer_note"\|"asha_visit_list", approved_by, edited_text?}`. Logs to audit |
 | GET | `/api/asha/visits` | Query `asha_id`. Her ranked visit list, after the officer approved one |
 | POST | `/api/asha/report` | Multipart: `file` (audio) or `text`, plus `asha_id`, `locality_id`. Gemini structures it into `{language, transcript, households_visited, fever, diarrhoea, cough, breathing, rash, children_affected, referred, water_issue_reported (bool), notes}`. Updates the alert's confidence and status. Returns that object plus `{alert_id, new_confidence}` |
 | GET | `/api/metrics` | `{orders_parsed, lines_parsed, auto_matched_pct, uncertain_pct, avg_latency_ms, asha_reports, alerts_confirmed}` |
+
+**Parse fixes (21 Nov).** `ParsedOrder` also carries `struck_out: [string]`: items crossed out on a handwritten list. The model is told to report them there and never as lines; any that still arrive as a line are forced to `unknown` with the reason "Crossed out on the list", so they can never be green. Interactive parses are capped at 25 s (`PARSE_DEADLINE_S`, applied to each HTTP call as well); if a bundled demo sample is slower, the labelled pre-recorded reading is shown and a background thread keeps trying with a 150 s budget (`WARM_DEADLINE_S`) so the next parse is a cache hit. Clean Latin-script brand names inside Hinglish sentences ("ondem 4 ke 8 patte", "zinc 20 dt 15 strip") now match green; real doubt (misspellings, bare shared names, wrong strengths) is still flagged.
+
+**Extended simulated data and chemist send (added 21 Nov).** All JSON, all labelled `simulated:true` except weather. Loaded lazily from `data/extended/`; if a file is missing the endpoint answers 200 with an empty result and an honest note (body field `note`, or header `X-Data-Note` for list responses), never a 500. "Today" for these views is the last day of the simulated window (2026-11-19, or `DEMO_AS_OF`).
+
+| Method | Path | Response |
+|---|---|---|
+| GET | `/api/overview` | `{orders_30d, lines_30d, chemists_active, share_by_channel:{voice_note, photo, whatsapp_text, salesman, phone_call, app} (fractions summing to 1), stockouts_14d (distinct SKUs reported not available), stockout_events_14d, avg_clerk_minutes_saved_per_order (ESTIMATE), avg_clerk_minutes_saved_basis, alerts_open, alerts_confirmed, window_days:30, as_of, simulated:true, note}`. 30 days of simulated orders plus orders approved live |
+| GET | `/api/backtest` | `{simulated:true, note, rule, events:[{event, pin, area, group, signal_first, asha_rise\|null, official_date\|null, lead_days_vs_official\|null, lead_days_vs_asha\|null, data_status:"projected_sim"\|"observed_sim"}], false_alarms:[{pin, group, alert_date, official_elevated, asha_rise, cause, verdict, data_status}], missed:[{event, pin, group, official_first_elevated_week_start, official_date, peak_typhoid_lab_positivity_pct, pharmacy_fever_peak_ratio, why_missed, data_status}], decoys:[...], median_lead_days_vs_official, median_lead_days_vs_asha}`. `?alert_id=` filters to the alert's pins and group and adds `filtered_by`. A SIMULATED scenario replay, never real evidence |
+| GET | `/api/environment` | `?pin=&days=30` (max 90). `[{date, temp_max, temp_min, precip_mm, humidity, pm25, pm10, source:"open-meteo"}]`. REAL data, nearest grid point. Header `X-Data-Note` |
+| GET | `/api/stockouts` | `?days=14`. `[{sku_id, brand, group, pins:[...], chemists, qty_wanted, days_of_cover\|null}]`, most chemists first. Simulated log plus live "not available" mentions read from parsed messages |
+| GET | `/api/asha/history` | `?pin=&days=30`. One row per day, zeros where no ASHA reported: `[{date, households_visited, fever, diarrhoea, cough, referred, reports}]`. Simulated reports plus live ones. `pin` omitted gives all pins |
+| POST | `/api/chemist/send` | Multipart: `chemist_id`, and `file` (audio or image) or `text`. Creates a new inbox message and returns `{message_id, status:"new"}`. Junk media gives 400 `invalid_media`, unknown chemist 404 |
+| GET | `/api/media/{message_id}` | The audio or image of any inbox message (bundled or sent through the app), for replay. 404 for a text message |
 
 **Confidence rule (simple, explainable):** `confidence = signal strength (ratio and z, capped) x breadth factor (share of chemists in that pin ordering above normal) x co-movement bonus`, then updated by ASHA reports. Reports with symptom counts above an expected background rate raise it; reports with near-zero counts lower it. Show the reasons in plain words.
 

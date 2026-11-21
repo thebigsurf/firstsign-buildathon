@@ -47,6 +47,7 @@ class ParsedOrder(BaseModel):
     transcript: str = ""
     lines: list[OrderLine] = Field(default_factory=list)
     not_available: list[str] = Field(default_factory=list)
+    struck_out: list[str] = Field(default_factory=list)
     notes: str = ""
     model: str = ""
     latency_ms: int = 0
@@ -94,6 +95,10 @@ class ModelOrderLine(BaseModel):
     qty: int | None = Field(default=None, description="Quantity as stated; null if not stated.")
     unit: str | None = Field(default=None, description="strip, box, bottle, sachet, tube or vial.")
     confidence: float = Field(default=0.7, description="Your own confidence from 0 to 1.")
+    struck_through: bool = Field(
+        default=False,
+        description="True only if this item is crossed out, struck through or scribbled over on the page. Such an item "
+                    "is cancelled and must NOT be returned as an order line; list it in struck_out instead.")
 
 
 class ModelOrderOut(BaseModel):
@@ -105,6 +110,10 @@ class ModelOrderOut(BaseModel):
         default_factory=list,
         description="Words or numbers you heard or read that look like part of an order but that you could not "
                     "turn into a line. Empty if everything was placed.")
+    struck_out: list[str] = Field(
+        default_factory=list,
+        description="Items on a handwritten list that are crossed out, struck through or scribbled over (cancelled by "
+                    "the writer). Copy the item's words. Never also return them as lines.")
     notes: str = ""
 
 

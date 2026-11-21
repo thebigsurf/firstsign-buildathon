@@ -398,16 +398,24 @@ export function OrderWorkspace(props: Props) {
               <span className="mono">{counts.notAvailable + naApi.length}</span> not available
             </p>
             <div className="ml-auto flex flex-wrap items-center gap-2">
-              <label htmlFor={approverId} className="text-sm font-medium">
-                Approving as
-              </label>
-              <select id={approverId} className="input w-auto" value={approver} onChange={(e) => props.onApprover(e.target.value)}>
-                {approvers.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>
+              {approvers.length > 1 ? (
+                <>
+                  <label htmlFor={approverId} className="text-sm font-medium">
+                    Approving as
+                  </label>
+                  <select id={approverId} className="input w-auto" value={approver} onChange={(e) => props.onApprover(e.target.value)}>
+                    {approvers.map((a) => (
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <p id={approverId} tabIndex={-1} className="m-0 text-sm">
+                  Approving as <strong>{approver}</strong>
+                </p>
+              )}
               <Button variant="ghost" onClick={props.onSkip}>
                 Skip
               </Button>

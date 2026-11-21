@@ -6,7 +6,7 @@ Because every order passes through, FirstSign also sees which medicine groups ar
 
 1. **Stock radar (distributor):** "stock up on these, and here is why".
 2. **Health officer view:** a ranked list of where ASHA workers should visit next, built from a live signal instead of past case data.
-3. **ASHA view:** the ASHA records her visit observations as a voice note in her own language. Gemini structures it, and it confirms or cancels the alert and becomes labelled ground truth.
+3. **ASHA view:** the ASHA records her visit observations as a voice note in her own language. Gemini structures it. One report moves the alert's confidence; **two independent reports confirm it**; a near-zero report lowers it. Each becomes labelled ground truth.
 
 A Gemini agent explains why an area is rising (using Google Search grounding) and drafts the actions. **A human approves every outbound action**, the screen always shows what the AI is unsure of, nothing is silently corrected, and every approval is written to an audit log.
 
@@ -86,11 +86,15 @@ This builds the frontend if needed and serves the app and API on <http://localho
 Tests:
 
 ```bash
-cd backend && python -m pytest        # 74 tests, offline
+cd backend && python -m pytest        # 119 tests, offline
 cd frontend && npm test && npm run lint
 ```
 
 Before a demo, fill the Gemini cache so repeated steps answer instantly even when the model is slow or rate-limited: `cd backend && python -m app.warm`.
+
+## Extended simulated data and new endpoints
+
+`data/extended/` holds 90 days of simulated raw records (14,331 orders, stock, claims, ASHA reports, official counts, lab positivity) and one **real** file, Open-Meteo weather and air quality. The backend exposes it through `/api/overview`, `/api/backtest`, `/api/environment`, `/api/stockouts` and `/api/asha/history`, sharpens the stock radar with days of cover and last week's unmet requests, and lets a chemist send an order with `POST /api/chemist/send` so it lands in the distributor inbox. The back-test is a replay of a **simulated** scenario, not evidence; every response says so. If `data/extended` is missing the endpoints still answer, empty, with a note. Shapes are in `ARCHITECTURE.md` section 5.
 
 ## Deploy to Google Cloud Run
 
@@ -113,7 +117,7 @@ docker run --rm -p 8080:8080 --env-file .env firstsign
 
 - No patient names are stored. Orders hold chemist ID, pin code, items and time only.
 - ASHA reports store counts, not names.
-- Audio and images are processed in memory and not kept beyond the request (demo samples excepted).
+- Audio and images are processed in memory and not kept beyond the request (demo samples excepted). Media a chemist sends through the app (`POST /api/chemist/send`) is kept in `backend/.state/media` so the clerk can replay it.
 - The API key lives only in `.env` (git-ignored) locally and in Secret Manager in the cloud.
 - Every approval and every line edit is recorded in the audit log.
 

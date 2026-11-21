@@ -2,8 +2,10 @@ import { ArrowLeft, Check, CircleX, Cpu, ExternalLink, RefreshCw, SearchX } from
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../lib/AuthContext";
 import { OFFICERS, TextActionCard, VisitListCard, type ApprovedState } from "../components/officer/ActionCards";
 import { alertTitle } from "../components/officer/AlertCard";
+import { AshaHistoryPanel, BacktestPanel, EnvironmentPanel } from "../components/officer/ExtendedPanels";
 import { AlertStatusChip, Badge, LevelBadge, PinChip } from "../components/ui/Badge";
 import { Button, ButtonLink } from "../components/ui/Button";
 import { ConfidenceMeter } from "../components/ui/ConfidenceMeter";
@@ -88,7 +90,8 @@ export function AlertDetail() {
   const [regenerating, setRegenerating] = useState(false);
   const [explanation, setExplanation] = useState<Explanation | null>(null);
   const [regenError, setRegenError] = useState<string | null>(null);
-  const [approver, setApprover] = useState(OFFICERS[0]);
+  const { user } = useAuth();
+  const [approver, setApprover] = useState(user && user.roleId !== "founder" ? user.approverLabel : OFFICERS[0]);
   const [busy, setBusy] = useState<ActionName | null>(null);
   const [localApprovals, setLocalApprovals] = useState<Partial<Record<ActionName, ApprovedState>>>({});
   const [showAllPins, setShowAllPins] = useState(false);
@@ -296,7 +299,7 @@ export function AlertDetail() {
             <h2 id="why-h" className="text-h2">Why we think this</h2>
             <div className="panel-info space-y-4" aria-busy={explainQ.loading || regenerating}>
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="font-semibold">Explained by Gemini with Google Search</span>
+                <span className="font-semibold">{shownExplanation?.grounded ? "Explained by Gemini with Google Search" : "Explained by Gemini from our order data"}</span>
                 {shownExplanation?.model && (
                   <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-0.5">
                     <Cpu size={14} aria-hidden="true" />
@@ -392,6 +395,10 @@ export function AlertDetail() {
               ) : null}
             </div>
           </section>
+
+          <BacktestPanel alertId={id} />
+          <EnvironmentPanel pins={alert.pins} />
+          <AshaHistoryPanel pins={alert.pins} />
 
           <section aria-labelledby="reports-h" className="space-y-3">
             <h2 id="reports-h" className="text-h2">ASHA reports</h2>

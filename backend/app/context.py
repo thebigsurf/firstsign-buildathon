@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from .agent import ExplainAgent
 from .catalogue import Catalogue
 from .config import Settings
+from .extended import ExtendedData
 from .gemini import GeminiClient
 from .service import Services
 from .signal import SignalService
@@ -23,6 +24,7 @@ class AppContext:
     signal: SignalService
     agent: ExplainAgent
     services: Services
+    extended: ExtendedData
 
 
 def build_context(settings: Settings, store: Store | None = None) -> AppContext:
@@ -31,7 +33,8 @@ def build_context(settings: Settings, store: Store | None = None) -> AppContext:
     store = store or build_store(settings)
     catalogue = Catalogue(ref.catalogue)
     gemini = GeminiClient(settings)
-    signal = SignalService(ref, store, catalogue, settings)
+    extended = ExtendedData(settings)
+    signal = SignalService(ref, store, catalogue, settings, extended)
     agent = ExplainAgent(gemini, signal, store, ref)
-    services = Services(settings, ref, store, catalogue, gemini, signal)
-    return AppContext(settings, ref, store, catalogue, gemini, signal, agent, services)
+    services = Services(settings, ref, store, catalogue, gemini, signal, extended)
+    return AppContext(settings, ref, store, catalogue, gemini, signal, agent, services, extended)

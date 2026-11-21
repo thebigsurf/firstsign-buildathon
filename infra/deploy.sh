@@ -16,7 +16,9 @@ GCLOUD="$(command -v gcloud || true)"
 if [ -z "$GCLOUD" ] && [ -n "${LOCALAPPDATA:-}" ]; then
   GCLOUD="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || echo "$LOCALAPPDATA")/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd"
 fi
-[ -x "$GCLOUD" ] || { echo "gcloud not found. Install the Google Cloud SDK first." >&2; exit 1; }
+# Windows: cmd.exe mangles a .cmd path with spaces when arguments also contain spaces, so use the 8.3 short path.
+if [ -f "$GCLOUD" ] && command -v cygpath >/dev/null 2>&1 && [[ "$GCLOUD" == *" "* ]]; then GCLOUD="$(cygpath -u "$(cygpath -s -w "$GCLOUD")")"; fi
+[ -f "$GCLOUD" ] || { echo "gcloud not found. Install the Google Cloud SDK first." >&2; exit 1; }
 g() { "$GCLOUD" "$@"; }
 
 ACCOUNT="$(g auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null || true)"

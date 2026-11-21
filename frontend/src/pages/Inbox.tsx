@@ -2,6 +2,7 @@ import { MessageSquareDashed } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../api";
+import { useUser } from "../lib/AuthContext";
 import { MessageList, type ListMessage, type StatusFilter } from "../components/inbox/MessageList";
 import { NewMessageModal, type NewMessage } from "../components/inbox/NewMessageModal";
 import { OrderWorkspace, type WorkspaceMessage } from "../components/inbox/OrderWorkspace";
@@ -53,7 +54,11 @@ export function Inbox() {
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [newOpen, setNewOpen] = useState(false);
   const [approving, setApproving] = useState(false);
+  const user = useUser();
+  const isFounder = user.roleId === "founder";
+  const approverList = isFounder ? APPROVERS : [user.approverLabel];
   const [approver, setApproverState] = useState(() => {
+    if (!isFounder) return user.approverLabel;
     const saved = readStored(APPROVER_KEY);
     return saved && APPROVERS.includes(saved) ? saved : APPROVERS[0];
   });
@@ -332,7 +337,7 @@ export function Inbox() {
             <OrderWorkspace
               message={workspaceMessage}
               work={selectedWork}
-              approvers={APPROVERS}
+              approvers={approverList}
               approver={approver}
               onApprover={setApprover}
               approving={approving}

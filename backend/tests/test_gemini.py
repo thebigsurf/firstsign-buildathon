@@ -30,7 +30,7 @@ def test_falls_back_to_next_model_after_503s_and_records_it(tmp_path: Path, monk
     client = live_client(tmp_path, monkeypatch)
     calls: list[str] = []
 
-    def fake_once(self: GeminiClient, model: str, *args: Any) -> tuple[str, list, list]:
+    def fake_once(self: GeminiClient, model: str, *args: Any, **kw: Any) -> tuple[str, list, list]:
         calls.append(model)
         if model == "m1":
             raise api_error(503)
@@ -48,7 +48,7 @@ def test_non_retryable_error_skips_straight_to_next_model(tmp_path: Path, monkey
     client = live_client(tmp_path, monkeypatch)
     calls: list[str] = []
 
-    def fake_once(self: GeminiClient, model: str, *args: Any) -> tuple[str, list, list]:
+    def fake_once(self: GeminiClient, model: str, *args: Any, **kw: Any) -> tuple[str, list, list]:
         calls.append(model)
         if model == "missing":
             raise api_error(404)
@@ -62,7 +62,7 @@ def test_non_retryable_error_skips_straight_to_next_model(tmp_path: Path, monkey
 def test_all_models_failing_raises_upstream_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     client = live_client(tmp_path, monkeypatch, gemini_max_attempts=2)
 
-    def always_429(self: GeminiClient, *args: Any) -> None:
+    def always_429(self: GeminiClient, *args: Any, **kw: Any) -> None:
         raise api_error(429)
 
     monkeypatch.setattr(GeminiClient, "_once", always_429)
@@ -75,7 +75,7 @@ def test_disk_cache_serves_second_call_without_calling_gemini(tmp_path: Path, mo
     client = live_client(tmp_path, monkeypatch)
     count = {"n": 0}
 
-    def fake_once(self: GeminiClient, model: str, *args: Any) -> tuple[str, list, list]:
+    def fake_once(self: GeminiClient, model: str, *args: Any, **kw: Any) -> tuple[str, list, list]:
         count["n"] += 1
         return '{"language": "en"}', [], []
 
@@ -148,7 +148,7 @@ def test_a_timeout_moves_on_to_the_next_model_without_retrying(tmp_path: Path, m
     client = live_client(tmp_path, monkeypatch)
     calls: list[str] = []
 
-    def fake_once(self: GeminiClient, model: str, *args: Any) -> tuple[str, list, list]:
+    def fake_once(self: GeminiClient, model: str, *args: Any, **kw: Any) -> tuple[str, list, list]:
         calls.append(model)
         if model == "slow":
             raise httpx.ReadTimeout("timed out")
@@ -172,7 +172,7 @@ def test_quota_error_with_long_retry_info_skips_the_model_and_short_one_waits(tm
     monkeypatch.setattr("app.gemini.time.sleep", sleeps.append)
     calls: list[str] = []
 
-    def fake_once(self: GeminiClient, model: str, *args: Any) -> tuple[str, list, list]:
+    def fake_once(self: GeminiClient, model: str, *args: Any, **kw: Any) -> tuple[str, list, list]:
         calls.append(model)
         if model == "long":
             raise quota("91s")
@@ -189,7 +189,7 @@ def test_grounding_quota_error_fails_fast_and_pauses_search(tmp_path: Path, monk
     client = live_client(tmp_path, monkeypatch)
     calls: list[str] = []
 
-    def quota(self: GeminiClient, model: str, *args: Any) -> None:
+    def quota(self: GeminiClient, model: str, *args: Any, **kw: Any) -> None:
         calls.append(model)
         raise api_error(429)
 
@@ -207,7 +207,7 @@ def test_a_model_that_rejects_the_thinking_setting_is_retried_with_its_default(t
     seen: list[bool] = []
 
     def fake_once(self: GeminiClient, model: str, prompt: str, system: str, media: Any, temperature: float,
-                  schema: Any, search: bool, fast: bool) -> tuple[str, list, list]:
+                  schema: Any, search: bool, fast: bool, **kw: Any) -> tuple[str, list, list]:
         seen.append(fast)
         if fast:
             raise errors.APIError(400, {"error": {"code": 400, "message": "Thinking level MINIMAL is not supported"}})

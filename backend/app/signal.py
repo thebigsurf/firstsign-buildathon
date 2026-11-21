@@ -36,7 +36,7 @@ import math
 import threading
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -420,11 +420,17 @@ def _x(value: float) -> str:
     return f"{value:.1f}x"
 
 
+if TYPE_CHECKING:
+    from .extended import ExtendedData
+
+
 class SignalService:
     """Everything the API needs from the signal: cells, alerts, radar. Recomputes when state changes."""
 
-    def __init__(self, ref: Reference, store: Store, catalogue: Catalogue, settings: Settings) -> None:
+    def __init__(self, ref: Reference, store: Store, catalogue: Catalogue, settings: Settings,
+                 extended: "ExtendedData | None" = None) -> None:
         self.ref, self.store, self.catalogue, self.settings = ref, store, catalogue, settings
+        self.extended = extended
         self.engine = SignalEngine(ref, settings)
         self._lock = threading.Lock()
         self._cache_version = -1
@@ -643,6 +649,7 @@ class SignalService:
         served = {c["pin"] for c in self.ref.chemists
                   if c["chemist_id"] in set(self.ref.distributor.get("chemist_ids", [c["chemist_id"]]))}
         live_sales = self._live_sku_volume()
+        cover, asked = self._stock_context()
         alert_of: dict[tuple[str, str], str] = {}
         for a in self._alerts:
             for p in a.pins:
@@ -657,7 +664,10 @@ class SignalService:
             # No per-SKU history in the data contract, so rank first-line molecules first, then live approved
             # volume, then how many spoken/written aliases chemists use for the item (a proxy for demand).
             first_line = FIRST_LINE_MOLECULES.get(group, ())
-            skus.sort(key=lambda s: (not any(k in s.molecule.lower() for k in first_line),
+            # Stock-outs first: an item chemists here already asked for and could not get is the one to send.
+            skus.sort(key=lambda s: (-asked.get((pin, s.sku_id), {}).get("chemists", 0) == 0,
+                                     not any(k in s.molecule.lower() for k in first_line),
+                                     -asked.get((pin, s.sku_id), {}).get("chemists", 0),
                                      -live_sales.get(s.sku_id, 0.0), -len(s.aliases)))
             top = skus[:4]
             weights = [w / sum(RADAR_WEIGHTS[: len(top)]) for w in RADAR_WEIGHTS[: len(top)]]
@@ -671,12 +681,41 @@ class SignalService:
                 pin=pin, area=self.ref.area(pin), group=group, ratio=round(cell.ratio, 2),
                 chemists_affected=int(round(cell.c_recent)), level=cell.level,  # type: ignore[arg-type]
                 group_label=self.ref.group_label(group), alert_id=alert_of.get((pin, group)),
-                skus=[RadarSku(sku_id=s.sku_id, brand=f"{s.brand} {s.strength}".strip(),
-                               suggested_qty=max(1, math.ceil(group_qty * w)), reason=reason)
+                skus=[self._radar_sku(s, w, group_qty, reason, pin, cover, asked)
                       for s, w in zip(top, weights, strict=True)],
             ))
         items.sort(key=lambda i: (i.level != "alert", -i.ratio))
         return items
+
+    def _stock_context(self) -> tuple[dict[str, float], dict[tuple[str, str], dict[str, int]]]:
+        """Days of cover per SKU at the distributor and who asked for what last week (simulated log plus live mentions)."""
+        if self.extended is None:
+            return {}, {}
+        live = [{"pin": x.get("pin"), "chemist_id": x.get("chemist_id"), "sku_id": x.get("sku_id"),
+                 "qty_wanted": x.get("qty_wanted", 0)} for x in self.store.list_stockouts()]
+        return self.extended.cover_by_sku(), self.extended.asked_by_sku_pin(7, live)
+
+    def _radar_sku(self, sku: Any, weight: float, group_qty: float, reason: str, pin: str,
+                   cover: dict[str, float], asked: dict[tuple[str, str], dict[str, int]]) -> RadarSku:
+        """One radar line. With stock and stock-out data the quantity adds the units already missed and the reason says why."""
+        qty = max(1, math.ceil(group_qty * weight))
+        brand = f"{sku.brand} {sku.strength}".strip()
+        days = cover.get(sku.sku_id)
+        ask = asked.get((pin, sku.sku_id))
+        if days is None and ask is None:
+            return RadarSku(sku_id=sku.sku_id, brand=brand, suggested_qty=qty, reason=reason)
+        parts = []
+        if days is not None:
+            parts.append(f"{days:.0f} days of cover" if days >= 1 else "0 days of cover")
+        if ask:
+            n = ask["chemists"]
+            parts.append(f"{n} {'chemist' if n == 1 else 'chemists'} in {self.ref.area(pin)} asked last week")
+            qty += ask["short"]
+        lead = ", ".join(parts)
+        extra = f" plus {ask['short']} units already missed" if ask and ask["short"] else ""
+        return RadarSku(sku_id=sku.sku_id, brand=brand, suggested_qty=qty,
+                        reason=f"{lead[0].upper()}{lead[1:]}. {qty - (ask['short'] if ask else 0)} units cover "
+                               f"{self.settings.cover_days} days at today's pace{extra}.")
 
     def _live_sku_volume(self) -> dict[str, float]:
         volume: dict[str, float] = {}

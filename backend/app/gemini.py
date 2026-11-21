@@ -231,9 +231,14 @@ class GeminiClient:
         temperature: float = 0.0,
         use_cache: bool = True,
         fast: bool = False,
+        deadline_s: float | None = None,
     ) -> GeminiResult:
-        """Call Gemini with a response schema and return JSON text. `fast=True` turns thinking down for parsing."""
-        return self._run(models, prompt, system, media, temperature, use_cache, schema=schema, search=False, fast=fast)
+        """Call Gemini with a response schema and return JSON text. `fast=True` turns thinking down for parsing.
+
+        `deadline_s` caps the whole fallback chain for this request (and each HTTP call within it).
+        """
+        return self._run(models, prompt, system, media, temperature, use_cache, schema=schema, search=False, fast=fast,
+                         deadline_s=deadline_s)
 
     def generate_grounded(
         self,
@@ -259,6 +264,7 @@ class GeminiClient:
         schema: type[BaseModel] | None,
         search: bool,
         fast: bool,
+        deadline_s: float | None = None,
     ) -> GeminiResult:
         if self.offline:
             raise UpstreamError("Gemini is in offline demo mode: no live call was made.")
@@ -281,7 +287,7 @@ class GeminiClient:
                 )
 
         failures: list[str] = []
-        deadline = time.monotonic() + self.settings.gemini_deadline_s
+        deadline = time.monotonic() + (deadline_s if deadline_s is not None else self.settings.gemini_deadline_s)
         for model in models:
             if time.monotonic() > deadline:
                 failures.append("overall time limit reached")
@@ -335,7 +341,8 @@ class GeminiClient:
             started = time.perf_counter()
             try:
                 with self._slots:
-                    text, sources, queries = self._once(model, prompt, system, media, temperature, schema, search, fast)
+                    text, sources, queries = self._once(model, prompt, system, media, temperature, schema, search, fast,
+                                                        timeout_s=deadline - time.monotonic())
                 latency = int((time.perf_counter() - started) * 1000)
                 if not text.strip():
                     raise ValueError("empty response")
@@ -361,6 +368,8 @@ class GeminiClient:
                             self._model_blocked_until[model] = time.monotonic() + MODEL_COOLDOWN_S
                         return None  # quota window is long: the next model in the chain is the better bet
                     if attempt < attempts:
+                        if time.monotonic() + wait > deadline:
+                            return None  # waiting would blow this request's budget
                         time.sleep(wait)
                         continue
             except Exception as exc:  # timeouts, connection resets, empty bodies
@@ -369,7 +378,10 @@ class GeminiClient:
                 if "Timeout" in type(exc).__name__:
                     return None  # a model that is this slow will not recover on retry: try the next one
             if attempt < attempts:
-                time.sleep(min(8.0, (2 ** (attempt - 1)) * 1.0 + random.uniform(0, 0.4)))
+                pause = min(8.0, (2 ** (attempt - 1)) * 1.0 + random.uniform(0, 0.4))
+                if time.monotonic() + pause > deadline:
+                    return None
+                time.sleep(pause)
         return None
 
     def _once(
@@ -382,6 +394,7 @@ class GeminiClient:
         schema: type[BaseModel] | None,
         search: bool,
         fast: bool,
+        timeout_s: float | None = None,
     ) -> tuple[str, list[dict[str, str]], list[str]]:
         from google.genai import types
 
@@ -399,6 +412,10 @@ class GeminiClient:
             thinking = fast_thinking_config(model)
             if thinking is not None:
                 config_args["thinking_config"] = thinking
+        if timeout_s is not None:
+            # Never wait longer than the request's remaining budget (and never longer than the client default).
+            budget = max(1.0, min(timeout_s, self.settings.gemini_timeout_s))
+            config_args["http_options"] = types.HttpOptions(timeout=int(budget * 1000))
         response = self._sdk().models.generate_content(
             model=model, contents=parts, config=types.GenerateContentConfig(**config_args)
         )

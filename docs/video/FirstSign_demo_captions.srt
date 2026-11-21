@@ -1,0 +1,72 @@
+1
+00:00:00,000 --> 00:00:08,779
+Voice notes and handwritten lists, retyped by hand
+
+2
+00:00:08,830 --> 00:00:17,609
+The same orders show illness early
+
+3
+00:00:17,660 --> 00:00:23,510
+Chemist: sends a Hindi voice note
+
+4
+00:00:23,560 --> 00:00:29,410
+It lands in the distributor's inbox
+
+5
+00:00:29,460 --> 00:00:36,666
+Gemini reads the Hindi and matches the catalogue
+
+6
+00:00:36,716 --> 00:00:43,923
+Unsure line: the clerk decides
+
+7
+00:00:43,973 --> 00:00:51,180
+Approved and logged in the audit trail
+
+8
+00:00:51,230 --> 00:00:58,560
+Stock radar: diarrhoea medicine rising in Kurla and Sion
+
+9
+00:00:58,610 --> 00:01:05,940
+What to stock, and why
+
+10
+00:01:05,990 --> 00:01:11,940
+Health officer: alert on the map
+
+11
+00:01:11,990 --> 00:01:17,940
+Gemini agent explains and drafts actions
+
+12
+00:01:17,990 --> 00:01:23,940
+A person approves every action
+
+13
+00:01:23,990 --> 00:01:31,763
+ASHA worker: a Hindi voice report
+
+14
+00:01:31,813 --> 00:01:39,586
+Gemini structures it into counts, no names
+
+15
+00:01:39,636 --> 00:01:47,410
+Second ASHA report: the alert is confirmed
+
+16
+00:01:47,460 --> 00:01:56,640
+Back-test: SIMULATED scenario, not real evidence
+
+17
+00:01:56,690 --> 00:02:05,870
+Weather and air: REAL Open-Meteo data
+
+18
+00:02:05,920 --> 00:02:15,990
+Built with Gemini on Google Cloud
+

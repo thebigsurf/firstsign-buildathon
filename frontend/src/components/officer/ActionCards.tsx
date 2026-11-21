@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, BadgeCheck, ClipboardList, FileText, Pencil, Send, Trash2, Truck, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../lib/AuthContext";
 import { fmtTime } from "../../lib/format";
 import type { ActionName, VisitItem } from "../../types";
 import { Badge } from "../ui/Badge";
@@ -70,18 +71,27 @@ interface ApproverRowProps {
 
 function ApproverRow({ approver, onApprover, onApprove, busy, disabled, note }: ApproverRowProps) {
   const id = useId();
+  const { user } = useAuth();
+  const isFounder = user?.roleId === "founder";
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
-        <label htmlFor={id} className="text-sm font-medium">
-          Approving as
-        </label>
-        <select id={id} className="input w-auto" value={approver} onChange={(e) => onApprover(e.target.value)}>
-          {OFFICERS.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
-        </select>
-        <span className="text-xs text-muted">(simulated names)</span>
+        {isFounder ? (
+          <>
+            <label htmlFor={id} className="text-sm font-medium">
+              Approving as
+            </label>
+            <select id={id} className="input w-auto" value={approver} onChange={(e) => onApprover(e.target.value)}>
+              {OFFICERS.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <p className="m-0 text-sm">
+            Approving as <strong>{approver}</strong>
+          </p>
+        )}
         <Button className="ml-auto" icon={<Send size={16} aria-hidden="true" />} loading={busy} disabled={disabled} onClick={onApprove}>
           Approve action
         </Button>

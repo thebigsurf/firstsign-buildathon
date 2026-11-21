@@ -44,6 +44,8 @@ class Settings:
     gemini_max_attempts: int = 3
     gemini_deadline_s: float = 150.0  # total budget across the whole fallback chain for one request
     gemini_max_concurrency: int = 4
+    parse_deadline_s: float = 25.0  # interactive parse: after this, fall back to the labelled sample and warm in background
+    warm_deadline_s: float = 150.0  # background warm after a fallback may take as long as it needs
     google_cloud_project: str = "firstsign-buildathon"
     google_cloud_region: str = "asia-south1"
     bq_dataset: str = "firstsign"
@@ -74,5 +76,7 @@ class Settings:
             google_cloud_region=os.getenv("GOOGLE_CLOUD_REGION", "asia-south1"),
             bq_dataset=os.getenv("BQ_DATASET", "firstsign"),
             demo_as_of=os.getenv("DEMO_AS_OF", "").strip(),
+            parse_deadline_s=float(os.getenv("PARSE_DEADLINE_S", "25")),
+            warm_deadline_s=float(os.getenv("WARM_DEADLINE_S", "150")),
             cover_days=int(os.getenv("RADAR_COVER_DAYS", "5")),
         )

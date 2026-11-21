@@ -31,7 +31,7 @@ class StubGemini:
     def __init__(self, payload: dict[str, Any], model: str = "stub-model") -> None:
         self.payload, self.model = payload, model
         self.prompts: list[tuple[str, str, list[Any]]] = []
-        self.settings = type("S", (), {"model_fast": ("stub-model",)})()
+        self.settings = type("S", (), {"model_fast": ("stub-model",), "parse_deadline_s": 25.0, "warm_deadline_s": 150.0})()
         self.offline_samples = SampleIndex(Path("no-such-samples-dir"))
 
     def generate_structured(self, models: Any, prompt: str, schema: Any, *, media: Any = (), system: str = "",

@@ -7,20 +7,27 @@ or hash, and a small rule-based reader for free text, so the demo never dies.
 
 from __future__ import annotations
 
-import json
+import hashlib
 import logging
 import re
 import shutil
 import subprocess
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .catalogue import Catalogue
+from .catalogue import Catalogue, normalise
 from .errors import BadRequest, UpstreamError
 from .gemini import GeminiClient, GeminiResult, Media
-from .models import AshaStructured, ModelOrderLine, ModelOrderOut, OrderLine, ParsedOrder
+from .models import (
+    AshaStructured,
+    ModelOrderLine,
+    ModelOrderOut,
+    OrderLine,
+    ParsedOrder,
+)
 
 log = logging.getLogger("firstsign.parsing")
 
@@ -51,7 +58,8 @@ read, line by line.
 7. language: the main language, as hi, mr or en.
 8. Never include any patient name. Do not guess. Do not correct the chemist's choices.
 9. If raw_text is in Devanagari (or any non-Latin script), also give raw_text_latin: the medicine name in Latin letters as it would be printed on the pack (for example "Zincovit", "ORS", "Pan D").
-10. List in unplaced every word or number you heard or read that looks like part of an order but that you could not turn into a line. If you had to interpret an unclear word, name it in notes. Never drop a line silently.
+10. Handwritten lists: an item that is crossed out, struck through, scribbled over or boxed out is CANCELLED by the writer. Never return it as an order line. Copy its words into struck_out instead (and mention it in notes). Only an item that is clearly not cancelled becomes a line. If you are unsure whether an item is struck through, still list it in struck_out rather than as a line.
+11. List in unplaced every word or number you heard or read that looks like part of an order but that you could not turn into a line. If you had to interpret an unclear word, name it in notes. Never drop a line silently.
 """
 
 ASHA_SYSTEM = """You structure a voice note from an ASHA worker (community health worker in India) about a household \
@@ -158,6 +166,7 @@ _UNITS = r"(strips?|boxe?s?|bottles?|sachets?|tubes?|vials?|patta|pattay|dabba|d
 _UNIT_MAP = {"patta": "strip", "pattay": "strip", "dabba": "box", "dibba": "box", "botal": "bottle"}
 _SHORT_RE = re.compile(r"\b(nahi|nahin|nai|short|khatam|not available|out of stock|na aaya|nahi aaya)\b", re.I)
 _QTY_UNIT_RE = re.compile(rf"(\d+)\s*{_UNITS}\b", re.I)
+_TRAILING_QTY_RE = re.compile(r"^(.*[A-Za-z])\s+(\d{1,2})$")
 _X_QTY_RE = re.compile(r"\bx\s*(\d+)\b|\b(\d+)\s*x\b", re.I)
 
 
@@ -184,6 +193,12 @@ def rule_based_lines(text: str) -> ModelOrderOut:
             if m:
                 qty = int(m.group(1) or m.group(2))
                 cleaned = segment.replace(m.group(0), " ")
+            else:
+                # "ors 25": a short trailing number after a name is the quantity; 3 digits or more is a strength.
+                m = _TRAILING_QTY_RE.search(segment)
+                if m:
+                    qty = int(m.group(2))
+                    cleaned = m.group(1)
         unit = _UNIT_MAP.get(unit or "", unit)
         cleaned = re.sub(r"\s+", " ", cleaned).strip()
         if cleaned:
@@ -212,6 +227,8 @@ def coerce_order_output(expected: dict[str, Any]) -> ModelOrderOut:
         transcript=str(expected.get("transcript", "")),
         lines=lines,
         not_available=[str(x) for x in expected.get("not_available", [])],
+        struck_out=[str(x) for x in expected.get("struck_out", [])]
+        or [m.strip() for m in _STRUCK_TRANSCRIPT_RE.findall(str(expected.get("transcript", "")))],
         notes=str(expected.get("notes", "")),
     )
 
@@ -219,6 +236,28 @@ def coerce_order_output(expected: dict[str, Any]) -> ModelOrderOut:
 UNAVAILABLE_NOTE = (
     "Gemini was unavailable just now, so this is the pre-recorded reading of this demo sample, not a live result."
 )
+
+
+_STRUCK_MARK_RE = re.compile(
+    r"\[[^\]]*(?:struck|crossed|cancel)[^\]]*\]|\b(?:struck|strike|strikethrough|crossed|cross(?:ed)? out|scribbled|cancelled|canceled)\b", re.I)
+_STRUCK_TRANSCRIPT_RE = re.compile(r"^\s*\[(?:struck|crossed)[^\]]*\]\s*(.+?)\s*$", re.I | re.M)
+
+
+def _is_struck(line: ModelOrderLine, struck_out: list[str]) -> bool:
+    if line.struck_through or _STRUCK_MARK_RE.search(line.raw_text):
+        return True
+    said = normalise(line.raw_text)
+    return bool(said) and any(normalise(item) == said or (len(said) >= 4 and said in normalise(item))
+                              for item in struck_out)
+
+
+def _struck_line(line: ModelOrderLine) -> OrderLine:
+    """A crossed-out item that still reached the lines: shown red (unknown) with a reason, never green."""
+    cleaned = _STRUCK_MARK_RE.sub("", line.raw_text).strip(" []:-") or line.raw_text
+    return OrderLine(
+        raw_text=cleaned, qty=line.qty or 1, unit=line.unit, confidence=0.0, status="unknown",
+        reason="Crossed out on the list, so the chemist cancelled it. Remove this line unless you know it is wanted.",
+    )
 
 
 _INTERPRET_RE = re.compile(r"interpret|assum|guess|probably|likely|presum|unclear|ambiguous|could be|may be|might", re.I)
@@ -290,7 +329,7 @@ def _expected_lines(catalogue: Catalogue, canned: dict[str, Any]) -> list[OrderL
 
 
 def _read_live(gemini: GeminiClient, catalogue: Catalogue, chemist: dict[str, Any], upload: Upload | None,
-               text: str | None) -> tuple[ModelOrderOut, GeminiResult]:
+               text: str | None, deadline_s: float | None = None) -> tuple[ModelOrderOut, GeminiResult]:
     media: list[Media] = []
     kind = "text message"
     if upload is not None:
@@ -300,12 +339,43 @@ def _read_live(gemini: GeminiClient, catalogue: Catalogue, chemist: dict[str, An
         kind = "voice note" if mime.startswith("audio/") else "photo of a handwritten order list"
     prompt = _order_prompt(catalogue, chemist, kind, text.strip() if text else None)
     result = gemini.generate_structured(
-        gemini.settings.model_fast, prompt, ModelOrderOut, media=media, system=ORDER_SYSTEM, fast=True
+        gemini.settings.model_fast, prompt, ModelOrderOut, media=media, system=ORDER_SYSTEM, fast=True,
+        deadline_s=deadline_s,
     )
     try:
         return ModelOrderOut.model_validate(result.json()), result
     except ValueError as exc:
         raise UpstreamError("Gemini returned an order in an unexpected shape.") from exc
+
+
+_warming: set[str] = set()
+_warming_lock = threading.Lock()
+
+
+def warm_in_background(gemini: GeminiClient, catalogue: Catalogue, chemist: dict[str, Any], upload: Upload | None,
+                       text: str | None) -> bool:
+    """After a fast fallback, keep trying the live model on a daemon thread so the next parse is a cache hit.
+
+    One thread per input (deduped by content hash). Returns True if a thread was started.
+    """
+    digest = hashlib.sha256((upload.data if upload else (text or "").encode("utf-8"))).hexdigest()
+    with _warming_lock:
+        if digest in _warming:
+            return False
+        _warming.add(digest)
+
+    def run() -> None:
+        try:
+            _read_live(gemini, catalogue, chemist, upload, text, deadline_s=gemini.settings.warm_deadline_s)
+            log.info("background warm finished for %s", digest[:8])
+        except Exception as exc:  # warm is best effort; the labelled sample already answered the request
+            log.warning("background warm failed (%s)", type(exc).__name__)
+        finally:
+            with _warming_lock:
+                _warming.discard(digest)
+
+    threading.Thread(target=run, name="parse-warm", daemon=True).start()
+    return True
 
 
 def parse_order(
@@ -341,13 +411,17 @@ def parse_order(
             model_name = "offline-none"
         latency = int((time.perf_counter() - started) * 1000)
     else:
+        canned = _canned_order(gemini, upload, expected_hint)
         try:
-            out, result = _read_live(gemini, catalogue, chemist, upload, text)
+            # A known demo sample has a labelled fallback, so fail over fast instead of letting a slow model hang the UI.
+            out, result = _read_live(gemini, catalogue, chemist, upload, text,
+                                     deadline_s=gemini.settings.parse_deadline_s if canned is not None else None)
             model_name, latency, cached = result.model, result.latency_ms, result.cached
         except UpstreamError:
-            canned = _canned_order(gemini, upload, expected_hint)
             if canned is None:
                 raise
+            if upload is not None or text:
+                warm_in_background(gemini, catalogue, chemist, upload, text)
             out, model_name, latency = coerce_order_output(canned), "offline-sample", 0
             canned_lines = _expected_lines(catalogue, canned)
             out = out.model_copy(update={"notes": f"{UNAVAILABLE_NOTE} {out.notes}".strip()})
@@ -355,7 +429,9 @@ def parse_order(
     if canned_lines is not None:
         lines = canned_lines
     else:
-        lines = _flag_interpreted([catalogue.validate_line(line) for line in out.lines], out.notes)
+        lines = _flag_interpreted(
+            [_struck_line(line) if _is_struck(line, out.struck_out) else catalogue.validate_line(line)
+             for line in out.lines], out.notes)
         warning = _missing_line_warning(out, len(lines))
         if warning:
             out = out.model_copy(update={"notes": f"{out.notes} {warning}".strip()})
@@ -366,6 +442,7 @@ def parse_order(
         transcript=out.transcript,
         lines=lines,
         not_available=out.not_available,
+        struck_out=out.struck_out,
         notes=out.notes,
         model=model_name,
         latency_ms=latency,

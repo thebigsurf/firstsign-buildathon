@@ -1,6 +1,6 @@
 """Warm the Gemini disk cache before a demo.
 
-    python -m app.warm            # parse every inbox message and explain every open alert
+    python -m app.warm            # parse every inbox message and explain every open alert (no 25 s cap)
     python -m app.warm --no-explain
 
 Runs against a throw-away in-memory store, so the demo state (inbox statuses, audit log) stays untouched; only
@@ -11,6 +11,7 @@ Gemini is slow or rate-limited that day.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import sys
 import time
 
@@ -29,13 +30,18 @@ def main() -> int:
     if settings.offline:
         print("Offline mode (no key or DEMO_OFFLINE=1): nothing to warm.")
         return 0
+    # Warming may take as long as it needs: lift the interactive 25 s cap so a slow message is cached, not skipped.
+    settings = dataclasses.replace(settings, parse_deadline_s=settings.warm_deadline_s)
     ctx = build_context(settings, LocalStore(None))
     failures = 0
+    live: list[str] = []
+    fallback: list[str] = []
     for message in ctx.ref.inbox:
         started = time.perf_counter()
         try:
             parsed = ctx.services.parse_order(message["chemist_id"], message["id"], None, None)
             status = f"{len(parsed.lines)} lines, {parsed.model}{' (cached)' if parsed.cached else ''}"
+            (fallback if parsed.model == "offline-sample" else live).append(message["id"])
         except AppError as exc:
             failures += 1
             status = f"FAILED {exc.code}: {exc.message[:90]}"
@@ -48,10 +54,14 @@ def main() -> int:
             try:
                 plan = ctx.agent.explain(alert.alert_id)
                 status = f"{plan.model}, {len(plan.sources)} sources, grounded={plan.grounded}"
+                (fallback if ("offline" in plan.model or "fallback" in plan.model) else live).append(alert.alert_id)
             except AppError as exc:
                 failures += 1
                 status = f"FAILED {exc.code}: {exc.message[:90]}"
             print(f"explain {alert.alert_id:<18} {time.perf_counter() - started:6.1f}s  {status}", flush=True)
+    print()
+    print(f"live-cached: {', '.join(live) or 'none'}")
+    print(f"fallback (labelled sample, NOT cached live): {', '.join(fallback) or 'none'}")
     return 1 if failures else 0
 
 

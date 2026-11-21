@@ -4,6 +4,12 @@ import type {
   ActionName,
   Alert,
   Asha,
+  AshaDay,
+  Backtest,
+  ChemistSendResult,
+  EnvDay,
+  Overview,
+  Stockout,
   AshaReportResult,
   AshaVisit,
   AuditEntry,
@@ -154,6 +160,24 @@ export const api = {
   localities: (pin: string, signal?: AbortSignal) => get<Locality[]>(`/localities?pin=${encodeURIComponent(pin)}`, signal),
   ashaVisits: (ashaId: string, signal?: AbortSignal) =>
     get<AshaVisit[]>(`/asha/visits?asha_id=${encodeURIComponent(ashaId)}`, signal),
+
+  overview: (signal?: AbortSignal) => get<Overview>("/overview", signal),
+  backtest: (alertId?: string, signal?: AbortSignal) =>
+    get<Backtest>(alertId ? `/backtest?alert_id=${encodeURIComponent(alertId)}` : "/backtest", signal),
+  environment: (pin: string, days = 30, signal?: AbortSignal) =>
+    get<EnvDay[]>(`/environment?pin=${encodeURIComponent(pin)}&days=${days}`, signal),
+  stockouts: (days = 14, signal?: AbortSignal) => get<Stockout[]>(`/stockouts?days=${days}`, signal),
+  ashaHistory: (pin: string, days = 30, signal?: AbortSignal) =>
+    get<AshaDay[]>(`/asha/history?pin=${encodeURIComponent(pin)}&days=${days}`, signal),
+
+  /** A chemist sends an order to the distributor (voice note, photo or text). */
+  chemistSend(input: { chemistId: string; file?: Blob | null; fileName?: string; text?: string }, signal?: AbortSignal): Promise<ChemistSendResult> {
+    const form = new FormData();
+    form.append("chemist_id", input.chemistId);
+    if (input.file) form.append("file", input.file, input.fileName ?? "upload");
+    if (input.text) form.append("text", input.text);
+    return postForm<ChemistSendResult>("/chemist/send", form, signal);
+  },
 
   parseOrder(input: ParseInput, signal?: AbortSignal): Promise<ParsedOrder> {
     const form = new FormData();

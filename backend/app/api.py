@@ -7,7 +7,7 @@ import os
 from typing import Any
 
 from fastapi import APIRouter, File, Form, Query, Request, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from . import __version__
 from .context import AppContext
@@ -102,16 +102,37 @@ def inbox(request: Request) -> list[dict[str, Any]]:
     return ctx(request).services.inbox()
 
 
-@router.get("/inbox/{message_id}/media")
-def inbox_media(request: Request, message_id: str) -> FileResponse:
-    c = ctx(request)
-    item = c.ref.inbox_item(message_id)
+def _media_response(request: Request, message_id: str) -> FileResponse:
+    services = ctx(request).services
+    item = services.find_message(message_id)
     if item is None or not item.get("media"):
         raise NotFound("Inbox media", message_id)
-    path = c.ref.resolve_data_path(item["media"])
+    path = services.message_media_path(item)
     if path is None:
-        raise NotFound("Sample file", item["media"])
+        raise NotFound("Media file", item["media"])
     return FileResponse(path, media_type=mimetypes.guess_type(path.name)[0] or "application/octet-stream")
+
+
+@router.get("/inbox/{message_id}/media")
+def inbox_media(request: Request, message_id: str) -> FileResponse:
+    return _media_response(request, message_id)
+
+
+@router.get("/media/{message_id}")
+def media(request: Request, message_id: str) -> FileResponse:
+    """The audio or image of any inbox message (bundled sample or sent through the app), for replay."""
+    return _media_response(request, message_id)
+
+
+@router.post("/chemist/send")
+def chemist_send(
+    request: Request,
+    chemist_id: str = Form(...),
+    file: UploadFile | None = File(default=None),
+    text: str | None = Form(default=None),
+) -> dict[str, str]:
+    """A chemist sends an order; it appears as a new message in the distributor inbox."""
+    return ctx(request).services.send_from_chemist(chemist_id, _upload(file), text)
 
 
 @router.post("/orders/parse", response_model=ParsedOrder)
@@ -167,6 +188,47 @@ def alert_detail(request: Request, alert_id: str) -> Alert:
 @router.get("/radar", response_model=list[RadarItem])
 def radar(request: Request) -> list[RadarItem]:
     return ctx(request).signal.radar()
+
+
+# ------------------------------------------------- simulated history, back-test, weather
+
+
+def _with_note(rows: list[dict[str, Any]], note: str) -> JSONResponse:
+    """A list response whose honest data note travels in the X-Data-Note header (the body stays a plain list)."""
+    return JSONResponse(rows, headers={"X-Data-Note": note.encode("ascii", "replace").decode()})
+
+
+@router.get("/overview")
+def overview(request: Request) -> dict[str, Any]:
+    """Landing-page tiles: 30 days of simulated history plus live approvals. Never zero when data/extended exists."""
+    return ctx(request).services.overview()
+
+
+@router.get("/backtest")
+def backtest(request: Request, alert_id: str | None = None) -> dict[str, Any]:
+    """The SIMULATED back-test: pharmacy signal vs ASHA vs official dates. Optionally filtered to one alert."""
+    return ctx(request).services.backtest(alert_id)
+
+
+@router.get("/environment")
+def environment(request: Request, pin: str = Query(min_length=6, max_length=6),
+                days: int = Query(default=30, ge=1, le=90)) -> JSONResponse:
+    """REAL Open-Meteo weather and air quality for the pin's nearest grid point."""
+    rows, note = ctx(request).services.environment(pin, days)
+    return _with_note(rows, note)
+
+
+@router.get("/stockouts")
+def stockouts(request: Request, days: int = Query(default=14, ge=1, le=90)) -> JSONResponse:
+    rows, note = ctx(request).services.stockouts(days)
+    return _with_note(rows, note)
+
+
+@router.get("/asha/history")
+def asha_history(request: Request, pin: str | None = Query(default=None, min_length=6, max_length=6),
+                 days: int = Query(default=30, ge=1, le=90)) -> JSONResponse:
+    rows, note = ctx(request).services.asha_history(pin, days)
+    return _with_note(rows, note)
 
 
 # ---------------------------------------------------------------------- agent

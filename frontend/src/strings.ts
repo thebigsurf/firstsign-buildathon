@@ -81,6 +81,9 @@ export const ASHA_STRINGS = {
   after: { hi: "अब", en: "Now" },
   priority: { hi: "प्राथमिकता", en: "Priority" },
   switchPerson: { hi: "नाम बदलें", en: "Not you?" },
+  lastDays: { hi: "पिछले 14 दिन की रिपोर्ट", en: "Your last 14 days" },
+  dayCol: { hi: "दिन", en: "Day" },
+  noHistory: { hi: "अभी कोई पुरानी रिपोर्ट नहीं।", en: "No earlier reports yet." },
   playback: { hi: "सुनें", en: "Play back" },
 } satisfies Record<string, Entry>;
 

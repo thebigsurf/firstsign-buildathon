@@ -1,16 +1,18 @@
-import { CircleHelp, FlaskConical, Map as MapIcon, Moon, PackageCheck, Mic, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
+import { FlaskConical, Info, Keyboard, LogOut, Map as MapIcon, Moon, PackageCheck, Mic, Store, Sun } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { initials, WORKSPACE_HOME, WORKSPACE_LABEL, workspaceOfPath, type DemoUser, type Workspace } from "../lib/auth";
+import { useAuth, useUser } from "../lib/AuthContext";
 import { cx } from "../lib/format";
 import { useTheme } from "../lib/theme";
 import { AuditLog } from "./AuditLog";
-import { IconButton } from "./ui/Button";
 import { Logo } from "./ui/Pulse";
 import { Modal } from "./ui/Modal";
 
-type Role = "distributor" | "officer" | "asha" | "none";
+type Role = "chemist" | "distributor" | "officer" | "asha" | "none";
 
 function roleOf(path: string): Role {
+  if (path.startsWith("/chemist")) return "chemist";
   if (path.startsWith("/distributor")) return "distributor";
   if (path.startsWith("/officer")) return "officer";
   if (path.startsWith("/asha")) return "asha";
@@ -18,6 +20,7 @@ function roleOf(path: string): Role {
 }
 
 const ROLES = [
+  { to: "/chemist", role: "chemist", en: "Chemist", hi: "केमिस्ट", short: "Chemist", icon: Store },
   { to: "/distributor/inbox", role: "distributor", en: "Distributor", hi: "वितरक", short: "Dist.", icon: PackageCheck },
   { to: "/officer", role: "officer", en: "Health officer", hi: "स्वास्थ्य अधिकारी", short: "Officer", icon: MapIcon },
   { to: "/asha", role: "asha", en: "ASHA", hi: "आशा", short: "ASHA", icon: Mic },
@@ -92,9 +95,86 @@ function KeyboardHelp({ open, onClose }: { open: boolean; onClose: () => void })
   );
 }
 
+function UserMenu({ user, onHelp }: { user: DemoUser; onHelp: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent): void => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const item = "flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-sunken";
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Account menu, ${user.name}`}
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-sunken"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accentFg" aria-hidden="true">
+          {initials(user.name)}
+        </span>
+      </button>
+      {open && (
+        <div role="menu" aria-label="Account" className="absolute right-0 top-12 z-50 w-64 rounded-lg border border-border bg-surface p-2 shadow-2">
+          <div className="border-b border-border px-3 pb-2 pt-1">
+            <p className="m-0 font-semibold">{user.name}</p>
+            <p className="m-0 text-sm text-muted">{user.roleLabel}</p>
+            <p className="m-0 text-xs text-muted">{user.org}</p>
+          </div>
+          <div className="pt-1">
+            <Link to="/about" role="menuitem" className={item}>
+              <Info size={18} strokeWidth={1.75} aria-hidden="true" /> About FirstSign
+            </Link>
+            <button type="button" role="menuitem" className={cx(item, "hidden md:flex")} onClick={() => { setOpen(false); onHelp(); }}>
+              <Keyboard size={18} strokeWidth={1.75} aria-hidden="true" /> Keyboard shortcuts
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className={item}
+              onClick={() => {
+                setOpen(false);
+                signOut();
+                navigate("/login", { replace: true });
+              }}
+            >
+              <LogOut size={18} strokeWidth={1.75} aria-hidden="true" /> Sign out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Shell() {
   const { pathname } = useLocation();
+  const user = useUser();
+  const navigate = useNavigate();
   const role = roleOf(pathname);
+  const ws = workspaceOfPath(pathname);
+  const isFounder = user.roleId === "founder";
+  const wsLabel = ws ? `${WORKSPACE_LABEL[ws]} workspace` : "FirstSign";
   const [params, setParams] = useSearchParams();
   const { theme, toggle } = useTheme();
   const [help, setHelp] = useState(false);
@@ -124,7 +204,7 @@ export function Shell() {
   };
 
   return (
-    <div style={{ ["--shell-h" as string]: subnav ? "132px" : "88px" }} className="min-h-dvh">
+    <div style={{ ["--shell-h" as string]: subnav ? "100px" : "56px" }} className="min-h-dvh">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[3000] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-accentFg"
@@ -134,69 +214,67 @@ export function Shell() {
       <header className="sticky top-0 z-40 border-b border-border bg-surface">
         <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-2 px-3 sm:gap-3 sm:px-4 md:px-6 xl:px-8">
           <Logo />
-          <nav aria-label="Choose your role" className="mx-auto hidden md:block">
-            <ul className="m-0 inline-flex list-none gap-1 rounded-lg bg-sunken p-1">
-              {ROLES.map((r) => (
-                <li key={r.role}>
-                  <NavLink
-                    to={r.to}
-                    aria-current={role === r.role ? "page" : undefined}
-                    className={cx(
-                      "inline-flex min-h-9 items-center gap-1.5 rounded-md border-b-2 px-3 text-sm font-medium",
-                      role === r.role ? "border-accent bg-surface text-text shadow-1" : "border-transparent text-muted hover:text-text",
-                    )}
-                  >
-                    {r.en}
-                    <span lang="hi" className="text-muted">{r.hi}</span>
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div className="ml-auto flex items-center gap-0 sm:gap-1 md:ml-0">
-            {isAsha && (
-              <Link to="/" className="inline-flex min-h-14 items-center whitespace-nowrap px-1 text-sm font-medium text-accentText underline md:hidden">
-                Change role
-              </Link>
-            )}
-            <IconButton label="Keyboard help" onClick={() => setHelp(true)} className="hidden md:inline-flex">
-              <CircleHelp size={20} strokeWidth={1.75} aria-hidden="true" />
-            </IconButton>
-            <IconButton label="Switch theme" onClick={toggle} aria-pressed={theme === "dark"} className={isAsha ? "min-h-14 min-w-14" : undefined}>
+          <div className="ml-1 hidden min-w-0 border-l border-border pl-3 leading-tight lg:block">
+            <p className="m-0 truncate text-sm font-medium">{user.org}</p>
+            <p className="m-0 truncate text-xs text-muted">{wsLabel}</p>
+          </div>
+          {isFounder && (
+            <label className="ml-2 hidden items-center gap-2 text-sm text-muted md:flex">
+              <span>Workspace</span>
+              <select
+                aria-label="Switch workspace"
+                className="input min-h-9 w-auto py-0 text-text"
+                value={ws ?? ""}
+                onChange={(e) => navigate(WORKSPACE_HOME[e.target.value as Workspace])}
+              >
+                {ws === null && <option value="">Choose...</option>}
+                {user.workspaces.map((w) => (
+                  <option key={w} value={w}>
+                    {WORKSPACE_LABEL[w]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <div
+              role="region"
+              aria-label="Simulated data notice"
+              title="Sandbox workspace: all orders, chemists, ASHA workers and the 90-day history are simulated. No real patients or people. यह डेमो डेटा है, असली नहीं।"
+              className="inline-flex min-h-7 items-center gap-1.5 whitespace-nowrap rounded-full border border-watch bg-watchBg px-2.5 text-xs font-medium text-watch"
+            >
+              <FlaskConical size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
+              <span className="whitespace-nowrap sm:hidden">
+                {isAsha ? <span lang="hi">डेमो डेटा</span> : "Simulated data"}
+              </span>
+              <span className="hidden sm:inline">
+                Sandbox workspace &middot; simulated data
+                <span lang="hi" className="ml-1.5 hidden xl:inline">/ डेमो डेटा</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label="Switch theme"
+              aria-pressed={theme === "dark"}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-sunken"
+            >
               {theme === "dark" ? <Sun size={20} strokeWidth={1.75} aria-hidden="true" /> : <Moon size={20} strokeWidth={1.75} aria-hidden="true" />}
-            </IconButton>
-            <Link to="/about" className={cx("inline-flex items-center rounded-lg text-sm font-medium hover:bg-sunken", isAsha ? "min-h-14 px-1.5" : "min-h-11 px-3")}>
-              About
-            </Link>
+            </button>
+            <UserMenu user={user} onHelp={() => setHelp(true)} />
           </div>
         </div>
       </header>
 
-      <div role="region" aria-label="Simulated data notice" className="sticky top-14 z-40 border-b border-watch bg-watchBg text-watch">
-        <div className="mx-auto flex max-w-[1440px] items-center gap-2 px-4 py-1.5 text-sm md:px-6 xl:px-8">
-          <FlaskConical size={16} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
-          {isAsha ? (
-            <p className="m-0 font-medium">
-              Simulated demo data <span lang="hi">/ डेमो डेटा</span>
-            </p>
-          ) : (
-            <p className="m-0">
-              <strong>Simulated demo data.</strong> Chemist orders and 90-day history are simulated, no real patients or people.{" "}
-              <span lang="hi" className="hidden lg:inline">यह डेमो डेटा है, असली नहीं।</span>
-            </p>
-          )}
-        </div>
-      </div>
-
       <SubNav role={role} />
 
-      <main id="main" tabIndex={-1} className={cx("outline-none", !isAsha && "pb-16 md:pb-0")}>
+      <main id="main" tabIndex={-1} className={cx("outline-none", isFounder && !isAsha && "pb-16 md:pb-0")}>
         <Outlet />
       </main>
 
-      {!isAsha && (
-        <nav aria-label="Choose your role (mobile)" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
-          <ul className="m-0 grid h-16 list-none grid-cols-3 p-0">
+      {isFounder && !isAsha && (
+        <nav aria-label="Choose your workspace (mobile)" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface md:hidden">
+          <ul className="m-0 grid h-16 list-none grid-cols-4 p-0">
             {ROLES.map((r) => {
               const Icon = r.icon;
               const current = role === r.role;

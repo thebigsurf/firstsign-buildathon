@@ -118,3 +118,14 @@ def test_offline_mode_gives_a_labelled_data_only_explanation(fixture_ctx: AppCon
 def test_unknown_alert_raises_not_found(fixture_ctx: AppContext) -> None:
     with pytest.raises(NotFound):
         fixture_ctx.agent.explain("fever-999999")
+
+
+def test_reasoning_failure_reuses_the_last_good_explanation(fixture_ctx: AppContext, tmp_path: Any) -> None:
+    good = StubGemini(SOURCES)
+    good.settings = type("S", (), {"model_reason": ("reason-model",), "cache_dir": tmp_path})()
+    first = agent_with(fixture_ctx, good).explain("diarrhoea-400001")
+    assert first.model == "reason-model"
+    down = StubGemini(SOURCES, reasoning=None)
+    down.settings = good.settings
+    again = agent_with(fixture_ctx, down).explain("diarrhoea-400001", refresh=True)
+    assert again.model == "reason-model" and "Earlier Gemini explanation" in again.search_note

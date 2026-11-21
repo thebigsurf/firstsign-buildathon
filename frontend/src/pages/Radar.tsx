@@ -1,4 +1,4 @@
-import { ChevronDown, ClipboardCopy, Radar as RadarIcon, ShieldCheck } from "lucide-react";
+import { ChevronDown, ClipboardCopy, PackageX, Radar as RadarIcon, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
@@ -8,9 +8,10 @@ import { EmptyState, ErrorPanel, Skeleton } from "../components/ui/States";
 import { Sparkline } from "../components/ui/Sparkline";
 import { useToast } from "../components/ui/Toast";
 import { cx, fmtDate, LEVEL_RANK, plural, ratioText } from "../lib/format";
+import { coverText } from "../lib/extended";
 import { toApiError, useAsync, useDocumentTitle } from "../lib/hooks";
 import { useRefData } from "../lib/refdata";
-import type { Cell, Level, RadarItem } from "../types";
+import type { Cell, Level, RadarItem, Stockout } from "../types";
 
 type Sort = "urgency" | "rise" | "area";
 
@@ -110,6 +111,11 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
                     </span>
                   </span>
                   <span className="block text-sm text-muted">{s.reason}</span>
+                  {coverText(s.days_of_cover) && (
+                    <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${(s.days_of_cover ?? 1) <= 3 ? "bg-alertBg text-alert" : "bg-sunken text-text"}`}>
+                      {coverText(s.days_of_cover)}
+                    </span>
+                  )}
                   <span className="sr-only">Add to my reorder list</span>
                 </label>
               </li>
@@ -139,11 +145,67 @@ function RadarCard({ item, rank, cell }: { item: RadarItem; rank: number; cell: 
   );
 }
 
+function StockoutsPanel({ rows }: { rows: Stockout[] }) {
+  const { groupLabel, areaOf } = useRefData();
+  const [all, setAll] = useState(false);
+  const sorted = [...rows].sort((a, b) => b.chemists - a.chemists || b.qty_wanted - a.qty_wanted);
+  const shown = all ? sorted : sorted.slice(0, 6);
+  return (
+    <section aria-labelledby="so-h" className="card space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <PackageX size={20} strokeWidth={1.75} aria-hidden="true" className="text-alert" />
+        <h2 id="so-h" className="text-h3">
+          Asked for, not available <span className="font-normal text-muted">last 14 days</span>
+        </h2>
+        <span className="rounded-full bg-watchBg px-2 py-0.5 text-xs font-semibold text-watch">Simulated history</span>
+      </div>
+      <p className="m-0 text-sm text-muted">Chemists asked for these and the order could not be filled in full. Reorder these first.</p>
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Stock-outs table, scrolls sideways">
+        <table className="w-full min-w-[38rem] text-left text-sm">
+          <caption className="sr-only">Medicines chemists asked for that were not available, last 14 days</caption>
+          <thead>
+            <tr className="text-muted">
+              <th scope="col" className="py-1 pr-3 font-medium">Medicine</th>
+              <th scope="col" className="px-3 py-1 font-medium">Group</th>
+              <th scope="col" className="px-3 py-1 text-right font-medium">Chemists</th>
+              <th scope="col" className="px-3 py-1 text-right font-medium">Units wanted</th>
+              <th scope="col" className="px-3 py-1 text-right font-medium">Cover</th>
+              <th scope="col" className="py-1 pl-3 font-medium">Pin codes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((r) => (
+              <tr key={r.sku_id} className="border-t border-border">
+                <th scope="row" className="py-2 pr-3 font-semibold">{r.brand}</th>
+                <td className="px-3 py-2">{groupLabel(r.group)}</td>
+                <td className="mono px-3 py-2 text-right">{r.chemists}</td>
+                <td className="mono px-3 py-2 text-right">{r.qty_wanted}</td>
+                <td className="mono px-3 py-2 text-right">{r.days_of_cover === null || r.days_of_cover === undefined ? "n/a" : `${r.days_of_cover} d`}</td>
+                <td className="py-2 pl-3">
+                  {r.pins.slice(0, 3).map((p) => areaOf(String(p))).join(", ")}
+                  {r.pins.length > 3 ? ` +${r.pins.length - 3}` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {sorted.length > 6 && (
+        <Button variant="ghost" size="sm" onClick={() => setAll((v) => !v)} aria-expanded={all}>
+          {all ? "Show fewer" : `Show all ${sorted.length}`}
+        </Button>
+      )}
+    </section>
+  );
+}
+
 export function Radar() {
   useDocumentTitle("Stock radar");
   const { groups } = useRefData();
   const radar = useAsync((s) => api.radar(s), []);
   const signal = useAsync((s) => api.signal(30, s), []);
+  const stockQ = useAsync((s) => api.stockouts(14, s), []);
+  const stockouts = stockQ.data ?? [];
   const [sort, setSort] = useState<Sort>("urgency");
   const [filter, setFilter] = useState<Set<string>>(new Set());
 
@@ -211,6 +273,9 @@ export function Radar() {
           </select>
         </label>
       </div>
+
+
+      {stockouts.length > 0 && <StockoutsPanel rows={stockouts} />}
 
       {radar.loading && !radar.data ? (
         <div aria-busy="true" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

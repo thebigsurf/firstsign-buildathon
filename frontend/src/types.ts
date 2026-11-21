@@ -202,6 +202,8 @@ export interface RadarSku {
   brand: string;
   suggested_qty: number;
   reason: string;
+  /** Distributor stock cover (days) when the backend knows it. */
+  days_of_cover?: number | null;
 }
 
 export interface RadarItem {
@@ -369,4 +371,92 @@ export interface Telemetry {
   offline?: boolean;
   grounded_sources_total: number;
   cache_hits: number;
+}
+
+// ---------------------------------------------------------------- extended data (mini contract)
+
+export interface Overview {
+  orders_30d: number;
+  lines_30d: number;
+  chemists_active: number;
+  share_by_channel: Record<string, number>;
+  stockouts_14d: number;
+  avg_clerk_minutes_saved_per_order: number;
+  avg_clerk_minutes_saved_basis?: string;
+  alerts_open: number;
+  alerts_confirmed: number;
+  simulated: boolean;
+}
+
+export interface BacktestEvent {
+  event: string;
+  area?: string;
+  pin: string | number;
+  group: string;
+  signal_first: string | null;
+  asha_rise: string | null;
+  official_date: string | null;
+  lead_days_vs_official: number | null;
+  lead_days_vs_asha: number | null;
+  data_status?: string;
+}
+
+export interface BacktestNote {
+  event?: string;
+  pin?: string | number;
+  pins?: Array<string | number>;
+  group?: string;
+  what?: string;
+  note?: string;
+  why?: string;
+  reason?: string;
+  summary?: string;
+  cause?: string;
+  verdict?: string;
+  why_missed?: string;
+}
+
+export interface Backtest {
+  simulated: boolean;
+  note: string;
+  rule: string;
+  events: BacktestEvent[];
+  false_alarms: BacktestNote[];
+  missed: BacktestNote[];
+}
+
+export interface EnvDay {
+  date: string;
+  temp_max: number | null;
+  temp_min: number | null;
+  precip_mm: number | null;
+  humidity: number | null;
+  pm25: number | null;
+  pm10: number | null;
+  source: string;
+}
+
+export interface Stockout {
+  sku_id: string;
+  brand: string;
+  group: string;
+  pins: Array<string | number>;
+  chemists: number;
+  qty_wanted: number;
+  days_of_cover?: number | null;
+}
+
+export interface AshaDay {
+  date: string;
+  households_visited: number;
+  fever: number;
+  diarrhoea: number;
+  cough: number;
+  referred: number;
+  reports: number;
+}
+
+export interface ChemistSendResult {
+  message_id: string;
+  status: string;
 }

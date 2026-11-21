@@ -9,12 +9,15 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any
 
 from .catalogue import Catalogue
 from .config import MANUAL_MIN_PER_10_LINES, REVIEW_MIN_PER_10_LINES, Settings
 from .errors import AppError, BadRequest, Conflict, NotFound
+from .extended import ExtendedData, nearest_pin_factory
 from .gemini import GeminiClient
 from .models import (
     ActionApproved,
@@ -29,7 +32,7 @@ from .models import (
     ParsedOrder,
     VisitItem,
 )
-from .parsing import Upload, parse_asha_report, parse_order
+from .parsing import Upload, detect_mime, parse_asha_report, parse_order
 from .signal import SignalService, report_delta
 from .store import Reference, Store, new_id, utc_now
 
@@ -38,16 +41,72 @@ NOTES_MAX = 300
 
 class Services:
     def __init__(self, settings: Settings, ref: Reference, store: Store, catalogue: Catalogue,
-                 gemini: GeminiClient, signal: SignalService) -> None:
+                 gemini: GeminiClient, signal: SignalService, extended: ExtendedData | None = None) -> None:
         self.settings, self.ref, self.store = settings, ref, store
         self.catalogue, self.gemini, self.signal = catalogue, gemini, signal
+        self.extended = extended or ExtendedData(settings)
+
+    @property
+    def media_dir(self) -> Path:
+        """Where media sent through the app is kept so it can be replayed (next to the state file)."""
+        return self.settings.state_file.parent / "media"
 
     # ------------------------------------------------------------------ inbox
+
+    def all_messages(self) -> list[dict[str, Any]]:
+        """Bundled demo messages, then messages chemists sent through the app (oldest first)."""
+        return [*self.ref.inbox, *self.store.list_messages()]
+
+    def find_message(self, message_id: str | None) -> dict[str, Any] | None:
+        if not message_id:
+            return None
+        return next((m for m in self.all_messages() if m.get("id") == message_id), None)
+
+    def message_media_path(self, message: dict[str, Any]) -> Path | None:
+        """Resolve a message's media file: a bundled sample under data/, or an upload under .state/media."""
+        media = message.get("media")
+        if not media:
+            return None
+        if message.get("media_file"):
+            root = self.media_dir.resolve()
+            candidate = (root / Path(message["media_file"]).name).resolve()
+            return candidate if candidate.is_file() and root in candidate.parents else None
+        return self.ref.resolve_data_path(media)
+
+    def send_from_chemist(self, chemist_id: str, upload: Upload | None, text: str | None) -> dict[str, Any]:
+        """A chemist sends an order (voice note, photo or text). It lands in the distributor inbox as a new message."""
+        chemist = self.ref.chemist(chemist_id)
+        if chemist is None:
+            raise NotFound("Chemist", chemist_id)
+        text = (text or "").strip() or None
+        if upload is None and not text:
+            raise BadRequest("Send a voice note, a photo of the list, or some text.")
+        message_id = new_id("msg")
+        msg: dict[str, Any] = {
+            "id": message_id, "chemist_id": chemist_id,
+            "received_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "type": "text", "text": text, "media": None, "expected": None, "source": "chemist_send",
+        }
+        if upload is not None:
+            mime = detect_mime(upload, ("audio", "image"))  # raises 400 for junk, before anything is stored
+            suffix = Path(upload.filename or "").suffix.lower() or (".ogg" if mime.startswith("audio") else ".jpg")
+            if not re.fullmatch(r"\.[a-z0-9]{1,5}", suffix):
+                suffix = ".bin"
+            filename = f"{message_id}{suffix}"
+            self.media_dir.mkdir(parents=True, exist_ok=True)
+            (self.media_dir / filename).write_bytes(upload.data)
+            msg.update(type="voice" if mime.startswith("audio/") else "photo", media=f"uploads/{filename}",
+                       media_file=filename, media_url=f"/api/media/{message_id}", mime_type=mime)
+        self.store.add_message(msg)
+        self.store.add_audit(chemist.get("owner_first_name") or chemist_id, "message_received", message_id,
+                             f"{chemist['shop_name']} sent a {msg['type']} order through the app.",
+                             detail={"chemist_id": chemist_id, "type": msg["type"]})
+        return {"message_id": message_id, "status": "new"}
 
     def inbox(self) -> list[dict[str, Any]]:
         approved = {o.get("message_id"): o["order_id"] for o in self.store.list_orders() if o.get("message_id")}
         out = []
-        for msg in self.ref.inbox:
+        for msg in self.all_messages():
             parsed = self.store.get_parse(msg["id"])
             status = "approved" if msg["id"] in approved else "parsed" if parsed else "new"
             chemist = self.ref.chemist(msg.get("chemist_id", "")) or {}
@@ -60,7 +119,7 @@ class Services:
 
     def parse_order(self, chemist_id: str | None, message_id: str | None, upload: Upload | None,
                     text: str | None) -> ParsedOrder:
-        item = self.ref.inbox_item(message_id) if message_id else None
+        item = self.find_message(message_id)
         if message_id and item is None and not upload and not text:
             raise NotFound("Inbox message", message_id)
         chemist_id = chemist_id or (item or {}).get("chemist_id")
@@ -75,7 +134,7 @@ class Services:
             if item.get("type") == "text":
                 text = item.get("text")
             elif item.get("media"):
-                path = self.ref.resolve_data_path(item["media"])
+                path = self.message_media_path(item)
                 if path is None:
                     raise NotFound("Sample file", item["media"])
                 upload = Upload(data=path.read_bytes(), filename=path.name)
@@ -87,11 +146,23 @@ class Services:
         parsed = parse_order(self.gemini, self.catalogue, chemist, message_id=message_id, upload=upload, text=text,
                              expected_hint=expected_hint)
         self.store.save_parse(message_id or f"chemist:{chemist_id}", parsed.model_dump())
+        self._record_stockouts(chemist, message_id, parsed)
         counts = {s: sum(1 for ln in parsed.lines if ln.status == s) for s in ("matched", "uncertain", "unknown")}
         self.store.log_parse({"at": utc_now(), "chemist_id": chemist_id, "message_id": message_id,
                               "lines": len(parsed.lines), "model": parsed.model, "latency_ms": parsed.latency_ms,
                               "cached": parsed.cached, **counts})
         return parsed
+
+    def _record_stockouts(self, chemist: dict[str, Any], message_id: str | None, parsed: ParsedOrder) -> None:
+        """Remember 'not available' mentions that name a catalogue item, once per message (feeds /api/stockouts)."""
+        for phrase in parsed.not_available:
+            sku_id = self.catalogue.resolve_name(phrase)
+            if sku_id is None:
+                continue
+            key = f"{message_id or chemist['chemist_id']}|{sku_id}"
+            self.store.add_stockout({"key": key, "at": utc_now(), "chemist_id": chemist["chemist_id"],
+                                     "pin": chemist["pin"], "sku_id": sku_id, "qty_wanted": 0, "text": phrase[:120],
+                                     "message_id": message_id})
 
     # ----------------------------------------------------------------- orders
 
@@ -289,6 +360,38 @@ class Services:
             detail={"action": body.action, "edited": approval.edited, "model": explanation.model},
         )
         return approval
+
+    # ------------------------------------------------------- extended data views
+
+    def overview(self) -> dict[str, Any]:
+        alerts = self.signal.alerts()
+        channel_of = {"voice": "voice_note", "photo": "photo", "text": "whatsapp_text"}
+        by_message = {m["id"]: channel_of.get(m.get("type", ""), "app") for m in self.all_messages()}
+        return self.extended.overview(
+            self.store.list_orders(), by_message,
+            alerts_open=sum(1 for a in alerts if a.status == "open"),
+            alerts_confirmed=sum(1 for a in alerts if a.status == "confirmed"))
+
+    def stockouts(self, days: int) -> tuple[list[dict[str, Any]], str]:
+        return self.extended.stockouts(days, self.store.list_stockouts(), self.catalogue)
+
+    def backtest(self, alert_id: str | None) -> dict[str, Any]:
+        if not alert_id:
+            return self.extended.backtest()
+        alert = self.signal.alert(alert_id)  # 404 for an unknown alert
+        result = self.extended.backtest(set(alert.pins), alert.group)
+        result["filtered_by"] = {"alert_id": alert.alert_id, "pins": alert.pins, "group": alert.group}
+        return result
+
+    def environment(self, pin: str, days: int) -> tuple[list[dict[str, Any]], str]:
+        if self.ref.pin(pin) is None:
+            raise NotFound("Pin code", pin)
+        return self.extended.environment(pin, days, nearest_pin_factory(self.ref.pincodes))
+
+    def asha_history(self, pin: str | None, days: int) -> tuple[list[dict[str, Any]], str]:
+        if pin and self.ref.pin(pin) is None:
+            raise NotFound("Pin code", pin)
+        return self.extended.asha_history(pin, days, self.store.list_asha_reports())
 
     # ---------------------------------------------------------------- metrics
 

@@ -1,51 +1,44 @@
 # FirstSign: submission checklist
 
-Deadline: **9:00 AM IST, 21 Nov 2026**. Submit: working link, pitch deck (PDF, under 5 MB), optional pitch video, code base.
+Deadline: **9:00 AM IST, 21 Nov 2026**. Submit: working link, pitch deck (PDF under 5 MB), optional video, code base.
 
-## Status
+## State at about 06:40 IST
 
-| Item | State | Note |
-|---|---|---|
-| Code base | Ready locally | 83 backend tests pass; frontend lint, tsc, vitest and build pass. Not yet pushed |
-| Working link | **Not live** | Cloud Run deploy needs gcloud sign-in and billing; never run |
-| Pitch deck | Content ready (`DECK.md`) | Slides not built; screenshots not yet in `docs/screens/` |
-| Pitch video | Script ready (`PITCH_VIDEO_SCRIPT.md`) | Not recorded |
-| Gemini cache | Warm for 9 of 10 inbox messages | Explain not cached with grounding |
-| Grounded Google Search | **Not working on this key** | 429 on every model on the free tier |
+| Item | State |
+|---|---|
+| Code | Ready. 120 backend tests; frontend tsc, lint, 27 vitest and build pass. Not pushed (no git was run overnight) |
+| Working link | NOT live. Needs billing, gcloud login and deploy |
+| Deck | Source is `docs/DECK.md`; new screenshots are the numbered files 01 to 11 in `docs/screens/`. Slides not built |
+| Video | Done: `docs/video/FirstSign_demo.mp4` (2:16) and `FirstSign_demo_captions.srt` |
+| Gemini | Cache warm for all 10 messages and 3 alerts. Live calls returned HTTP 402 this morning |
 
 ## Do these in order
 
-1. **Billing and key (blocks 2, 3, 4).** Enable billing on project `firstsign-buildathon`, or put a billed key in `.env`. This also lifts the 20 requests per day limit on the faster models and enables Search grounding.
-2. **Check tests and a local run.**
+1. **Fix billing or the key (5 min).** Enable billing on project `firstsign-buildathon`, or put a billed key in `.env`. You will see whether it works in step 2.
+2. **Re-warm and check locally.**
    ```bash
-   cd backend && python -m pytest -q
-   cd ../frontend && npm run lint && npm test && npm run build
-   cd .. && bash run_local.sh        # http://localhost:8000, stop with Ctrl+C
+   cd backend && python -m pytest -q && python -m app.warm
+   cd .. && bash run_local.sh     # http://localhost:8000
    ```
-3. **Warm the cache** (with the billed key, so grounded explanations are stored):
-   ```bash
-   cd backend && python -m app.warm
-   ```
-   Then open each of the 3 alerts once in the officer page and press Explain.
-4. **Deploy.**
+   `warm` should end with "live-cached" for 10 messages and 3 alerts and "fallback ...: none". If the key still fails, keep the existing cache and demo with `DEMO_OFFLINE=1`.
+3. **Sign in to gcloud and deploy.**
    ```bash
    gcloud auth login
+   gcloud config set project firstsign-buildathon
    bash infra/deploy.sh
    ```
-   The script prints the live URL and checks `/api/health`. Then `curl -X POST <url>/api/demo/reset` and rehearse `DEMO_SCRIPT.md` once on the live link, on a phone.
-5. **Screenshots.** Create `docs/screens/` and capture: landing, inbox with a parsed order, radar Kurla card, officer map, alert detail with explanation, ASHA phone record screen, About. Light theme, 1440 px and 390 px.
-6. **Build the deck** from `DECK.md`, export PDF, check size is under 5 MB. Put the live URL and a QR on slide 1. If the dashboard shows a template, map the slides as noted at the top of `DECK.md`.
-7. **Record the video** (2 minutes, `PITCH_VIDEO_SCRIPT.md`) from the live link. Upload to YouTube as unlisted, or a Drive link set to anyone with the link.
-8. **Code base.** Confirm `.env` is not tracked (`git ls-files | grep -c "^.env$"` must print 0), then push the repo to a new GitHub repository for this competition. Make it public or add the organisers as viewers.
-9. **Submit on the Hack2skill dashboard:** live link, deck PDF, video link, GitHub link. Open each link in a private window to confirm it works.
-10. **Rotate the Gemini key after judging** and delete the Secret Manager version if it was a personal key.
+   The script prints the URL and checks `/api/health`. The warm cache is git-ignored, so a clean build has none: copy `backend/.cache` into the build or run `python -m app.warm` with the deployed settings. Then `curl -X POST <url>/api/demo/reset` and open the link on a phone.
+4. **Code base.** Confirm `.env` is not tracked (`git ls-files | grep -c "^.env$"` must print 0). Push to a new GitHub repository. Make it public, or add the organisers as viewers.
+5. **Deck.** Build the slides from `docs/DECK.md`, export a PDF under 5 MB. Put the live URL and a QR on slide 1. Screenshots: `docs/screens/` (numbered) or `docs/qa_screens/final/`.
+6. **Video.** Upload `docs/video/FirstSign_demo.mp4` to YouTube (unlisted) or Drive (anyone with the link). Delete `docs/video/raw`, `build`, `frames` and `audio` before pushing (about 40 MB of intermediates).
+7. **Submit** on the dashboard: live link, deck PDF, video link, GitHub link. Open each link in a private window.
+8. **After judging:** rotate the Gemini key.
 
 ## If the live link cannot be ready
-Submit the GitHub link with the run command (`bash run_local.sh`), and demo from the laptop with `DEMO_OFFLINE=1` as the fallback. Label offline results as pre-recorded in the pitch. Do not present a localhost URL as the working link.
+Submit the GitHub link, the video and the run command (`bash run_local.sh`). Say plainly that the demo is not hosted. Do not present localhost as the working link.
 
-## Known issues to disclose, not hide
-- Free-tier key: grounding returns no sources; the app says so.
-- The Marathi sample (msg_03) times out on the slow model and falls back to a labelled pre-recorded sample.
-- Signal evidence is simulated data. All demo history is labelled as simulated in the UI.
-- Firestore and BigQuery paths are written but untested; the Docker image was not built in QA.
-- `ARCHITECTURE.md` and README still say one ASHA report confirms an alert; the code now needs two.
+## Disclose, do not hide
+- All history, ASHA, official-case and lab data are simulated; the back-test is a simulated replay; weather and air are real.
+- No Google Search grounding sources on this key.
+- Firestore, BigQuery and Docker were not exercised.
+- The video's second ASHA report reuses the first sample audio.

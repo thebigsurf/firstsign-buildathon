@@ -39,6 +39,16 @@ _UNIT_WORDS = frozenset({
     "पत्ते", "पत्ता", "पत्ती", "पट्ट्या", "पट्टी", "पैकेट", "डब्बा", "डिब्बा", "डब्बे", "बोतल", "बॉटल", "शीशी", "सैशे",
     "पाउच", "नग", "बाटली", "बाटल्या",
 })
+# Hinglish grammar and filler that carries no brand ("ondem ke 4", "bachchon wali ondem syrup"). Dropped before the
+# spelling check so a clean Latin brand name inside a natural sentence is not marked uncertain for its grammar.
+_FILLER_WORDS = frozenset({
+    "ka", "ki", "ke", "ko", "wali", "wala", "vali", "waali", "bachchon", "bachon", "bacchon", "bachcho", "aur", "the",
+    "a", "woh", "wo", "vo", "bhej", "dena", "de", "do", "please", "pls", "chahiye", "bhi", "zaroor", "bhejna",
+})
+# Words about availability, dropped before looking a "not available" mention up in the catalogue.
+_STOCK_WORDS = frozenset({
+    "nahi", "nahin", "nai", "short", "khatam", "not", "available", "out", "of", "stock", "na", "aaya", "aya", "pichli", "baar", "tha", "hai", "is", "zaroor", "bhejna", "confirm", "check", "kare", "karo", "chahiye", "mila",
+})
 _DEVANAGARI_RE = re.compile("[ऀ-ॿ]")
 # Words that name a kind of medicine or a bit of Hinglish grammar, not a brand. They must not carry a match alone.
 _GENERIC_WORDS = frozenset({
@@ -83,6 +93,14 @@ def phonetic_key(text: str) -> str:
 
 def _numbers(text: str) -> set[str]:
     return {n.rstrip("0").rstrip(".") if "." in n else n for n in _NUM_RE.findall(text)}
+
+
+def _listed_words(tokens: list[str], names: list[str], sku: "Sku") -> bool:
+    """True if every word and number written is a word of this item's brand, strength or a listed alias."""
+    if not tokens:
+        return False
+    vocabulary = {t for n in names for t in n.split()} | set(normalise(sku.strength).split())
+    return all(t in vocabulary for t in tokens)
 
 
 @dataclass(frozen=True)
@@ -276,14 +294,26 @@ class Catalogue:
             reason=" ".join(reasons) or None,
         )
 
+    def resolve_name(self, text: str) -> str | None:
+        """The sku_id a free phrase clearly names ("electral nahi aaya"), or None. Used for 'not available' mentions."""
+        cleaned = " ".join(t for t in normalise(text).split() if t not in _STOCK_WORDS)
+        if not cleaned:
+            return None
+        ranked = self.rank(cleaned)
+        top = ranked[0] if ranked else None
+        if top and top.score >= MIN_SUGGEST_UNNAMED and self._names_a_brand(cleaned, top):
+            return top.sku_id
+        return None
+
     def _names_a_brand(self, query: str, top: Candidate) -> bool:
         """After dropping generic words (syrup, wali, ...), does what is left really resemble the suggested item?"""
         brandish = " ".join(t for t in normalise(query).split() if t not in _GENERIC_WORDS and t not in _UNIT_WORDS
-                            and not t.isdigit())
+                            and t not in _FILLER_WORDS and not t.isdigit())
         if not brandish:
             return False
         sku = self.skus[top.sku_id]
-        names = [" ".join(t for t in normalise(n).split() if not t.isdigit()) for n in (sku.brand, *sku.aliases)]
+        names = [" ".join(t for t in normalise(n).split() if not t.isdigit() and t not in _GENERIC_WORDS)
+                 for n in (sku.brand, *sku.aliases)]
         return max((fuzz.ratio(brandish, n) for n in names if n), default=0) / 100 >= SPELLING_MIN - 0.1
 
     def _cap_for_doubt(self, line: ModelOrderLine, query: str, sku: Sku, chosen: Candidate, confidence: float,
@@ -294,11 +324,14 @@ class Catalogue:
         admits it interpreted the wording all send the line to the clerk with a reason.
         """
         cap = CONFIDENCE_THRESHOLD - 0.05
-        tokens = [t for t in normalise(query).split() if t not in _UNIT_WORDS and t != str(line.qty)]
+        tokens = [t for t in normalise(query).split()
+                  if t not in _UNIT_WORDS and t not in _FILLER_WORDS and t != str(line.qty)]
         words = [t for t in tokens if not t.isdigit()]
         spelled = " ".join(tokens)
         names = [normalise(sku.brand), normalise(f"{sku.brand} {sku.strength}"), *(normalise(a) for a in sku.aliases)]
         plain = max((fuzz.ratio(spelled, n) for n in names if n), default=0) / 100
+        if plain < SPELLING_MIN and _listed_words(tokens, names, sku):
+            plain = 1.0  # every word and number is a listed word of this item, only in another order ("zinc 20 dt")
         if not chosen.exact and plain < SPELLING_MIN:
             reasons.append(f"Written as '{line.raw_text}', which is not a listed spelling of {sku.brand}; please confirm.")
             confidence = min(confidence, cap)
@@ -320,7 +353,7 @@ class Catalogue:
         better top score wins (the full wording keeps a real strength such as "Dolo 650" intact).
         """
         full = self.rank(query)
-        tokens = [t for t in normalise(query).split() if t not in _UNIT_WORDS]
+        tokens = [t for t in normalise(query).split() if t not in _UNIT_WORDS and t not in _FILLER_WORDS]
         if qty is not None and len(tokens) > 1:
             for i in range(len(tokens) - 1, -1, -1):
                 if tokens[i] == str(qty):

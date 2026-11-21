@@ -32,7 +32,7 @@ Also available: dark theme, Hindi/Marathi/English labels, keyboard path, 320 px 
 ## 5. Architecture (T, G)
 Diagram: WhatsApp-style input -> FastAPI on **Cloud Run (asia-south1)** -> Gemini (parse, agent) -> signal engine (local; BigQuery AI.FORECAST optional) -> React and Leaflet front end.
 Live in the demo: **Gemini API (google-genai), Cloud Run, Secret Manager, Cloud Build, Artifact Registry**. Optional, off by default: **Firestore, BigQuery**.
-Engineering, all real: JSON response schema on every call, model fallback chain with cooldown after quota errors, disk cache by input hash, offline mode, magic-byte media checks, audit log, 83 backend tests, frontend lint, tsc and vitest.
+Engineering, all real: JSON response schema on every call, model fallback chain with cooldown after quota errors, disk cache by input hash, offline mode, magic-byte media checks, audit log, 120 backend tests, frontend lint, tsc and vitest.
 
 ## 6. How we use Gemini (G)
 | Job | Capability | Detail |
